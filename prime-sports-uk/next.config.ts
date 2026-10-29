@@ -44,6 +44,10 @@ const nextConfig: NextConfig = {
       "*.css": { loaders: ["@tailwindcss/turbopack"], as: "*.css" },
     },
   },
+  experimental: {
+    // Photos are resized in the browser first, so uploads stay well under Vercel's 4.5 MB limit.
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   images: {
     remotePatterns: [
       {
