@@ -37,3 +37,27 @@ export async function payAndExpectConfirmed(page: Page) {
   await expect(page.getByRole("heading", { name: "You're booked in!" })).toBeVisible({ timeout: 30_000 });
   return (await page.locator(".ref").textContent())!.trim();
 }
+
+const MAILPIT = process.env.MAILPIT_URL || "http://127.0.0.1:54324";
+
+/** Signs in through the real magic-link flow, reading the email from the local Mailpit inbox. */
+export async function signIn(page: Page, email: string, next = "/account") {
+  await page.goto(`/login?next=${encodeURIComponent(next)}`);
+  await page.getByLabel("Email address").fill(email);
+  const since = Date.now();
+  await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  await expect(page.getByText("Check your email")).toBeVisible();
+  let link: string | null = null;
+  for (let i = 0; i < 30 && !link; i++) {
+    const res = await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${email}"`)}`);
+    const json = (await res.json()) as { messages: { ID: string; Created: string }[] };
+    const msg = json.messages.find((m) => new Date(m.Created).getTime() >= since - 5000);
+    if (msg) {
+      const full = (await (await fetch(`${MAILPIT}/api/v1/message/${msg.ID}`)).json()) as { Text: string; HTML: string };
+      link = (full.HTML.match(/href="([^"]*verify[^"]*)"/)?.[1] ?? full.Text.match(/(http\S*verify\S*)/)?.[1] ?? null)?.replace(/&amp;/g, "&") ?? null;
+    }
+    if (!link) await page.waitForTimeout(500);
+  }
+  if (!link) throw new Error(`No magic link email for ${email}`);
+  await page.goto(link);
+}

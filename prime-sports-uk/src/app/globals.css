@@ -430,3 +430,5 @@ section { padding-block: 4.5rem; }
 .cardrow span { font-size: 0.72rem; font-weight: 800; border: 1px solid var(--line); border-radius: 6px; padding: 0.2rem 0.45rem; color: var(--muted); }
 .saved-kids { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .camp p, .card p, .form-card p { margin-inline: 0; }
+.account h2 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin-bottom: 0.8rem; }
+.acc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 1rem; }
