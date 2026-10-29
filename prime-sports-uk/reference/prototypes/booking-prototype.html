@@ -1,0 +1,385 @@
+<title>Prime Sports Bookings</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: friendly marketplace feel — soft canvas, photo-topped cards, one focused flow column with a floating basket */
+:root{
+  --bg:#f5f3ee;--card:#ffffff;--ink:#16140f;--muted:#6b665b;--line:#ebe6db;--soft:#faf8f3;
+  --black:#0d0d0d;--gold:#d4a72c;--gold-soft:#fbf3dc;--gold-ink:#0d0d0d;
+  --ok:#17804a;--ok-soft:#e6f5ec;--warn:#a85b12;--warn-soft:#fdf0e1;--bad:#b3261e;--bad-soft:#fdecea;
+  --shadow:0 1px 2px rgba(22,20,15,.05),0 8px 24px rgba(22,20,15,.07);
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;--body:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121110;--card:#1c1b19;--ink:#f3efe6;--muted:#aba394;--line:#2d2a25;--soft:#171614;--gold-soft:#2c2513;--ok:#5cc28a;--ok-soft:#14261b;--warn:#e2a35f;--warn-soft:#2b2114;--bad:#f08a80;--bad-soft:#2d1716;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121110;--card:#1c1b19;--ink:#f3efe6;--muted:#aba394;--line:#2d2a25;--soft:#171614;--gold-soft:#2c2513;--ok:#5cc28a;--ok-soft:#14261b;--warn:#e2a35f;--warn-soft:#2b2114;--bad:#f08a80;--bad-soft:#2d1716;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--card)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4{margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(1.7rem,4.5vw,2.3rem);font-weight:800;line-height:1.15}
+h2{font-size:1.35rem;font-weight:800}
+h3{font-size:1.05rem;font-weight:800}
+p{margin:0}
+.muted{color:var(--muted)}
+button{font:inherit;cursor:pointer;color:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4em;border:0;border-radius:14px;padding:.85em 1.4em;font-weight:800;background:var(--black);color:#fff;transition:transform .12s,opacity .12s}
+.btn:hover{transform:translateY(-1px)}
+.btn.gold{background:var(--gold);color:var(--gold-ink)}
+.btn.ghost{background:var(--card);border:1.5px solid var(--line);color:var(--ink)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.link{background:none;border:0;padding:0;font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-block:.75rem}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:800}
+.mark{width:36px;height:36px;border-radius:10px;background:var(--black);color:var(--gold);display:grid;place-items:center;font:800 1rem var(--display)}
+.brand small{display:block;font-weight:600;font-size:.72rem;color:var(--muted)}
+.nav{display:flex;gap:.25rem;overflow-x:auto;scrollbar-width:none;padding-block:.5rem}
+.nav button{white-space:nowrap;background:none;border:0;padding:.55rem .9rem;border-radius:999px;font-weight:700;color:var(--muted)}
+.nav button.on{background:var(--black);color:#fff}
+.proto{font-size:.8rem;color:var(--muted);padding-block:.6rem;display:flex;gap:.5rem;align-items:center}
+.proto i{width:8px;height:8px;border-radius:50%;background:var(--warn);flex:none}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:1.5rem;align-items:start;padding-bottom:4rem}
+@media (max-width:880px){.layout{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:1.4rem;display:grid;gap:1.1rem;min-width:0}
+
+.progress{display:flex;gap:6px;margin-block:.4rem 1.2rem}
+.progress span{flex:1;height:5px;border-radius:9px;background:var(--line)}
+.progress span.on{background:var(--gold)}
+.stepname{font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+.search{display:flex;align-items:center;gap:.6rem;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:.35rem .4rem .35rem 1rem}
+.search input{border:0;background:transparent;padding:.7rem 0;font:600 1rem var(--body);color:var(--ink);flex:1;min-width:0;outline:none}
+.camps{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.1rem}
+.camp{background:var(--card);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;display:grid;text-align:left;border:2px solid transparent;padding:0;transition:transform .15s,border-color .15s}
+.camp:hover{transform:translateY(-3px)}
+.camp.on{border-color:var(--gold)}
+.photo{aspect-ratio:16/10;position:relative;background:linear-gradient(135deg,#2a2a2a,#0d0d0d);display:grid;place-items:center}
+.photo.g{background:linear-gradient(135deg,#e5bd4d,#9c7414)}
+.photo .ph{font:800 1rem var(--display);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.photo .badge{position:absolute;left:.8rem;top:.8rem;background:var(--card);color:var(--ink);font-size:.75rem;font-weight:800;padding:.3rem .65rem;border-radius:999px}
+.photo .lg{position:absolute;right:.9rem;bottom:-24px;width:56px;height:56px;border-radius:50%;background:var(--black);color:var(--gold);border:3px solid var(--card);display:grid;place-items:center;font:800 .95rem var(--display)}
+.camp .body{padding:1.1rem 1.1rem 1.2rem;display:grid;gap:.45rem}
+.chips{display:flex;gap:.35rem;flex-wrap:wrap}
+.chip{font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:999px;background:var(--soft);border:1px solid var(--line);color:var(--muted)}
+.chip.gold{background:var(--gold-soft);border-color:transparent;color:var(--ink)}
+.price{display:flex;justify-content:space-between;align-items:baseline;margin-top:.3rem}
+.price b{font-size:1.25rem}
+.ex{font-size:.7rem;font-weight:800;color:var(--warn);background:var(--warn-soft);padding:.2rem .5rem;border-radius:999px}
+
+.days{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.6rem}
+.day{border:1.5px solid var(--line);border-radius:16px;padding:.75rem .5rem;background:var(--card);display:grid;justify-items:center;gap:.1rem;transition:border-color .12s,background .12s}
+.day .dw{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.day .dn{font:800 1.9rem/1 var(--display)}
+.day .dm{font-size:.75rem;color:var(--muted)}
+.day .sp{margin-top:.35rem;font-size:.7rem;font-weight:800;padding:.15rem .45rem;border-radius:999px}
+.sp.ok{background:var(--ok-soft);color:var(--ok)}.sp.low{background:var(--warn-soft);color:var(--warn)}.sp.full{background:var(--bad-soft);color:var(--bad)}
+.day.on{border-color:var(--gold);background:var(--gold-soft)}
+.day:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;justify-content:space-between}
+
+.kid{border:1.5px solid var(--line);border-radius:18px;padding:1.1rem;display:grid;gap:.9rem}
+.kid-head{display:flex;align-items:center;gap:.8rem}
+.av{width:44px;height:44px;border-radius:50%;background:var(--gold-soft);color:var(--ink);display:grid;place-items:center;font-weight:800;flex:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+@media (max-width:540px){.grid2{grid-template-columns:1fr}}
+label{display:grid;gap:.3rem;font-weight:700;font-size:.85rem}
+input,select,textarea{font:500 .98rem var(--body);padding:.75rem .9rem;border-radius:12px;border:1.5px solid var(--line);background:var(--soft);color:var(--ink);width:100%;transition:border-color .12s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);background:var(--card)}
+textarea{min-height:64px;resize:vertical}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.seg button{border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:.7rem;font-weight:700;font-size:.88rem}
+.seg button.on{border-color:var(--gold);background:var(--gold-soft)}
+.hint{font-size:.82rem;color:var(--muted);font-weight:500}
+.err{color:var(--bad);background:var(--bad-soft);font-weight:700;font-size:.88rem;padding:.7rem .9rem;border-radius:12px}
+.err:empty{display:none}
+
+.plans{display:grid;gap:.7rem}
+.plan{display:grid;grid-template-columns:auto 1fr auto;gap:.9rem;align-items:center;text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:16px;padding:1rem}
+.plan.on{border-color:var(--gold);background:var(--gold-soft)}
+.plan:disabled{opacity:.5;cursor:not-allowed}
+.radio{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center}
+.plan.on .radio{border-color:var(--gold)}
+.plan.on .radio::after{content:"";width:11px;height:11px;border-radius:50%;background:var(--gold)}
+.plan b{display:block}
+.sched{display:grid;gap:.35rem;background:var(--soft);border-radius:14px;padding:.9rem;font-size:.88rem}
+.sched div{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.pay-box{border:1.5px solid var(--line);border-radius:16px;padding:1rem;display:grid;gap:.6rem}
+.cardrow{display:flex;gap:.4rem;flex-wrap:wrap}
+.cardrow span{font-size:.72rem;font-weight:800;border:1px solid var(--line);border-radius:6px;padding:.2rem .45rem;color:var(--muted)}
+.chk{display:flex;gap:.65rem;align-items:flex-start;font-weight:500;font-size:.9rem}
+.chk input{width:20px;height:20px;margin:.1rem 0 0;flex:none;accent-color:var(--gold)}
+
+.basket{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
+.line{display:flex;justify-content:space-between;gap:1rem;font-variant-numeric:tabular-nums;font-size:.92rem}
+.line.disc{color:var(--ok);font-weight:700}
+.line.total{font-weight:800;font-size:1.25rem;border-top:1px dashed var(--line);padding-top:.8rem}
+.today{background:var(--gold-soft);border-radius:12px;padding:.7rem .85rem;display:flex;justify-content:space-between;font-weight:800;font-variant-numeric:tabular-nums}
+.trust{display:grid;gap:.35rem;font-size:.8rem;color:var(--muted)}
+
+.done{text-align:center;justify-items:center;padding-block:2.5rem}
+.tick{width:76px;height:76px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;font-size:2.2rem;font-weight:800}
+.ref{font:800 1.4rem var(--display);letter-spacing:.08em;background:var(--soft);border:1.5px dashed var(--line);border-radius:12px;padding:.4rem 1rem}
+
+.subs{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.1rem}
+.sub{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:1.4rem;display:grid;gap:.8rem;align-content:start;border:2px solid transparent;text-align:left}
+.sub.on{border-color:var(--gold)}
+.sub .amt{font-size:2rem;font-weight:800;line-height:1}.sub .amt small{font-size:.9rem;color:var(--muted);font-weight:600}
+.sub ul{margin:0;padding-left:1.1rem;display:grid;gap:.25rem;color:var(--muted);font-size:.9rem}
+.tier{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:.5rem}
+.tier button{border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:.6rem .4rem;display:grid;gap:.1rem;font-size:.82rem;font-weight:700}
+.tier button b{font-size:1.05rem}
+.tier button.on{border-color:var(--gold);background:var(--gold-soft)}
+
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
+th,td{text-align:left;padding:.7rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tag{display:inline-block;font-size:.74rem;font-weight:800;padding:.2rem .55rem;border-radius:999px}
+.tag.med{background:var(--bad-soft);color:var(--bad)}.tag.ph{background:var(--warn-soft);color:var(--warn)}.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.pills{display:flex;gap:.4rem;flex-wrap:wrap}
+.pills button{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:.4rem .85rem;font-weight:700;font-size:.85rem}
+.pills button.on{background:var(--black);border-color:var(--black);color:#fff}
+
+.feat{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.8rem}
+.feat div{background:var(--soft);border-radius:16px;padding:1rem;display:grid;gap:.3rem}
+.feat .st{justify-self:start}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header>
+  <div class="wrap">
+    <div class="brand"><span class="mark">PS</span><span>Prime Sports UK<small>Bookings</small></span></div>
+    <button class="btn ghost" id="basketBtn" type="button" style="padding:.55em 1em">Basket · <span id="bTotal">£0</span></button>
+  </div>
+  <div class="wrap"><div class="nav" id="nav">
+    <button class="on" data-v="book" type="button">Holiday camps</button>
+    <button data-v="subs" type="button">Memberships</button>
+    <button data-v="admin" type="button">Staff register</button>
+    <button data-v="plan" type="button">Build plan</button>
+  </div></div>
+</header>
+<div class="wrap"><p class="proto"><i></i>Prototype for testing. No payments are taken and nothing you enter is saved.</p></div>
+
+<main class="wrap">
+  <section id="v-book"><div class="layout"><div id="stage" style="display:grid;gap:1.2rem;min-width:0"></div><aside class="card basket" id="basket"></aside></div></section>
+  <section id="v-subs" hidden><div class="layout"><div id="subStage" style="display:grid;gap:1.2rem;min-width:0"></div><aside class="card basket" id="subBasket"></aside></div></section>
+  <section id="v-admin" hidden style="padding-bottom:4rem"><div class="card" id="admin"></div></section>
+  <section id="v-plan" hidden style="padding-bottom:4rem"><div class="card"><h2>Features taken from Pebble</h2><p class="muted">What works in this prototype, what we build for January, and what follows after launch.</p><div class="feat" id="feat"></div></div></section>
+</main>
+
+<script>
+const TODAY=new Date("2026-10-21");
+const CAMPS=[
+ {id:"bga",school:"Bowling Green Academy",area:"Halifax",init:"BGA",ages:"4–11",min:4,max:11,price:22,times:"9am – 3pm",photo:"",
+  days:[["2026-10-27",30,22],["2026-10-28",30,27],["2026-10-29",30,30]]},
+ {id:"tps",school:"Thornton Primary School",area:"Bradford",init:"TPS",ages:"4–11",min:4,max:11,price:15,times:"9am – 3pm",photo:"g",
+  days:[["2026-10-26",24,9],["2026-10-27",24,14],["2026-10-28",24,20]]},
+ {id:"pc",school:"Prime Camps February",area:"Halifax",init:"PC",ages:"5–17",min:5,max:17,price:25,times:"8:30am – 4pm",photo:"g",example:true,
+  days:[["2027-02-15",40,6],["2027-02-16",40,4],["2027-02-17",40,9],["2027-02-18",40,3],["2027-02-19",40,11]]}
+];
+const SUBS=[
+ {id:"goat",name:"G.O.A.T Football Academy",tag:"Football development",ages:"5–14",blurb:"Weekly coaching focused on each player's own progress.",
+  perks:["One coached session every week","Player progress updates","Cancel any time before your next payment"],
+  tiers:[["1 session a week",25],["2 sessions a week",40]]},
+ {id:"pass",name:"Prime Camps Holiday Pass",tag:"Holiday camps",ages:"5–17",blurb:"Spread the cost of camps across the year with a monthly pass.",
+  perks:["Monthly camp-day credits to spend at any venue","Priority booking before general release","Credits roll over for 12 months"],
+  tiers:[["2 days a month",42],["4 days a month",80]]}
+];
+const CODES={EARLYBIRD:{pct:10,label:"Early-bird 10%"}};
+const SIB_PCT=10;
+const EXAMPLES=[{name:"Lily H.",age:7,med:"Nut allergy · EpiPen in bag",photo:false,collect:"Mum, Grandad",phone:"07700 900123"},
+ {name:"Sam K.",age:9,med:"",photo:true,collect:"Dad",phone:"07700 900456"}];
+const $=id=>document.getElementById(id);
+const esc=t=>String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const gbp=n=>"£"+(Math.round(n*100)/100).toFixed(2).replace(/\.00$/,"");
+const D=s=>new Date(s+"T12:00:00");
+const fmt=(s,o)=>D(s).toLocaleDateString("en-GB",o);
+const addMonths=(d,n)=>{const x=new Date(d);x.setMonth(x.getMonth()+n);return x};
+const blankKid=()=>({first:"",last:"",dob:"",school:"",med:"",allergy:"",send:"",photo:"",collect:""});
+const blankParent=()=>({name:"",email:"",phone:"",ename:"",ephone:"",erel:""});
+let S={step:0,q:"",camp:null,days:[],kids:[blankKid()],parent:blankParent(),code:"",codeOk:null,plan:"full",terms:false,ref:null};
+let M={step:0,sub:null,tier:0,kid:blankKid(),parent:blankParent(),terms:false,ref:null};
+const bookings=[],members=[];
+const STEPS=["Choose camp & days","Who's coming","Your details","Payment","Confirmed"];
+
+function ageOn(dob,ref){if(!dob)return null;const d=new Date(dob),r=D(ref);let a=r.getFullYear()-d.getFullYear();if(r.getMonth()<d.getMonth()||(r.getMonth()==d.getMonth()&&r.getDate()<d.getDate()))a--;return a}
+const camp=()=>CAMPS.find(c=>c.id===S.camp);
+function quote(){
+  const c=camp();if(!c||!S.days.length)return{lines:[],disc:[],total:0};
+  const per=c.price*S.days.length,n=S.kids.length,lines=[],disc=[];
+  S.kids.forEach((k,i)=>lines.push([(k.first||"Child "+(i+1))+" · "+S.days.length+" day"+(S.days.length>1?"s":""),per]));
+  const sub=per*n,sib=n>1?per*(n-1)*SIB_PCT/100:0;if(sib)disc.push(["Sibling discount",sib]);
+  const code=S.codeOk?CODES[S.codeOk]:null,cd=code?(sub-sib)*code.pct/100:0;if(cd)disc.push([code.label,cd]);
+  return{lines,disc,total:sub-sib-cd}
+}
+// instalments: last payment must land 7+ days before the first camp day
+function instalmentOptions(){
+  const c=camp();if(!c||!S.days.length)return[];
+  const first=D(S.days[0]),out=[];
+  for(const n of [2,3]){if(addMonths(TODAY,n-1)<=new Date(first.getTime()-7*864e5))out.push(n)}
+  return out
+}
+function schedule(total,n){const each=Math.floor(total/n*100)/100,rest=Math.round((total-each*(n-1))*100)/100;
+  return Array.from({length:n},(_,i)=>[i===0?"Today":addMonths(TODAY,i).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}),i===0?rest:each])}
+
+function progress(step,steps){return `<div><p class="stepname">Step ${Math.min(step+1,steps.length)} of ${steps.length} · ${steps[step]}</p><div class="progress">${steps.map((_,i)=>`<span class="${i<=step?"on":""}"></span>`).join("")}</div></div>`}
+
+function stageBook(){
+  const c=camp();
+  if(S.step===0){
+    const q=S.q.trim().toLowerCase(),list=CAMPS.filter(k=>!q||(k.area+" "+k.school).toLowerCase().includes(q));
+    return `${progress(0,STEPS)}<h1>Book a holiday camp</h1>
+    <div class="search"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="Search your town or school" value="${esc(S.q)}"></div>
+    <div class="camps">${list.map(k=>`<button type="button" class="camp${k.id===S.camp?" on":""}" data-camp="${k.id}">
+      <div class="photo ${k.photo}"><span class="ph">Camp photo</span><span class="badge">${esc(k.area)}</span><span class="lg">${k.init}</span></div>
+      <div class="body"><h3>${esc(k.school)}</h3><div class="chips"><span class="chip gold">Ages ${k.ages}</span><span class="chip">${k.times}</span>${k.example?`<span class="ex">Example</span>`:""}</div>
+      <p class="muted" style="font-size:.85rem">${fmt(k.days[0][0],{day:"numeric",month:"short"})} – ${fmt(k.days.at(-1)[0],{day:"numeric",month:"short"})}</p>
+      <div class="price"><span class="muted" style="font-size:.85rem">from</span><b>${gbp(k.price)}<span class="muted" style="font-size:.8rem;font-weight:600"> / day</span></b></div></div></button>`).join("")||`<p class="muted">No camps match “${esc(S.q)}” yet.</p>`}</div>
+    ${c?`<div class="card" id="dayCard"><div class="row"><div><h2>${esc(c.school)}</h2><p class="muted">Tap the days you'd like.</p></div><button type="button" class="link" id="allDays">Select all days</button></div>
+      <div class="days">${c.days.map(d=>{const left=d[1]-d[2],on=S.days.includes(d[0]),cls=left<=0?"full":left<=8?"low":"ok";
+      return `<button type="button" class="day${on?" on":""}" data-day="${d[0]}" ${left<=0?"disabled":""}><span class="dw">${fmt(d[0],{weekday:"short"})}</span><span class="dn">${fmt(d[0],{day:"numeric"})}</span><span class="dm">${fmt(d[0],{month:"short"})}</span><span class="sp ${cls}">${left<=0?"Full":left+" left"}</span></button>`}).join("")}</div>
+      <button class="btn gold block" type="button" id="next" ${S.days.length?"":"disabled"}>Continue</button></div>`:""}`}
+  if(S.step===1){return `${progress(1,STEPS)}<h1>Who's coming?</h1><p class="muted">Add each child. Brothers and sisters get ${SIB_PCT}% off.</p>
+    ${S.kids.map((k,i)=>kidForm(k,"c"+i,i,S.kids.length>1)).join("")}
+    <button type="button" class="btn ghost block" id="addKid">+ Add another child</button>
+    <p class="err" id="err"></p><div class="row"><button type="button" class="btn ghost" id="back">Back</button><button type="button" class="btn gold" id="next">Continue</button></div>`}
+  if(S.step===2){return `${progress(2,STEPS)}<h1>Your details</h1>${parentForm(S.parent)}<p class="err" id="err"></p><div class="row"><button type="button" class="btn ghost" id="back">Back</button><button type="button" class="btn gold" id="next">Continue to payment</button></div>`}
+  if(S.step===3){
+    const t=quote().total,opts=instalmentOptions();if(S.plan!=="full"&&!opts.includes(+S.plan))S.plan="full";
+    return `${progress(3,STEPS)}<h1>How would you like to pay?</h1>
+    <div class="plans">
+      <button type="button" class="plan${S.plan==="full"?" on":""}" data-plan="full"><span class="radio"></span><span><b>Pay in full</b><span class="hint">One payment today</span></span><b>${gbp(t)}</b></button>
+      ${[2,3].map(n=>{const ok=opts.includes(n),s=schedule(t,n);return `<button type="button" class="plan${S.plan==n?" on":""}" data-plan="${n}" ${ok?"":"disabled"}><span class="radio"></span><span><b>Pay in ${n} monthly instalments</b><span class="hint">${ok?`${gbp(s[0][1])} today, then ${gbp(s[1][1])} a month`:"Not available: camp starts too soon"}</span></span><b>${ok?gbp(s[0][1]):""}</b></button>`}).join("")}
+    </div>
+    ${S.plan!=="full"?`<div class="sched"><b>Your payment schedule</b>${schedule(t,+S.plan).map(r=>`<div><span>${r[0]}</span><span>${gbp(r[1])}</span></div>`).join("")}<span class="hint">Payments are taken automatically from the same card. All instalments finish before the camp starts.</span></div>`:""}
+    <label>Discount code<span style="display:flex;gap:.5rem"><input id="code" value="${esc(S.code)}" placeholder="e.g. EARLYBIRD"><button type="button" class="btn" id="applyCode">Apply</button></span></label>
+    ${S.codeOk===false?`<p class="err">That code isn't valid. Check the spelling and try again.</p>`:S.codeOk?`<p class="tag ok" style="justify-self:start">${CODES[S.codeOk].label} applied</p>`:""}
+    <div class="pay-box"><div class="row"><b>Card details</b><div class="cardrow"><span>VISA</span><span>Mastercard</span><span>Apple Pay</span><span>Google Pay</span></div></div><p class="hint">In the live version, Stripe's secure card form appears here. Your card details never touch our website.</p></div>
+    <label class="chk"><input type="checkbox" id="terms" ${S.terms?"checked":""}><span>I agree to the booking terms, cancellation policy and privacy notice${S.plan!=="full"?", and authorise the scheduled instalment payments":""}.</span></label>
+    <p class="err" id="err"></p>
+    <div class="row"><button type="button" class="btn ghost" id="back">Back</button><button type="button" class="btn gold" id="pay">Pay ${gbp(S.plan==="full"?t:schedule(t,+S.plan)[0][1])} now</button></div>`}
+  if(S.step===4){return `<div class="card done"><div class="tick">✓</div><h1>You're booked in!</h1><span class="ref">${S.ref}</span>
+    <p class="muted" style="max-width:46ch">We'll email ${esc(S.parent.email)} with what to bring, drop-off times and the venue address.${S.plan!=="full"?` Your remaining ${+S.plan-1} instalment${+S.plan>2?"s":""} will be taken automatically.`:""}</p>
+    <div class="row" style="justify-content:center"><button type="button" class="btn ghost" id="seeReg">See the staff register</button><button type="button" class="btn gold" id="again">Book another camp</button></div></div>`}
+}
+function kidForm(k,p,i,removable){
+  const init=((k.first[0]||"")+(k.last[0]||"")).toUpperCase()||(i+1);
+  return `<div class="card"><div class="kid-head"><span class="av">${esc(init)}</span><h3 style="flex:1">${k.first?esc(k.first+" "+k.last):"Child "+(i+1)}</h3>${removable?`<button type="button" class="link" data-rm="${i}">Remove</button>`:""}</div>
+  <div class="grid2"><label>First name<input id="${p}first" value="${esc(k.first)}" autocomplete="off"></label><label>Surname<input id="${p}last" value="${esc(k.last)}" autocomplete="off"></label>
+  <label>Date of birth<input type="date" id="${p}dob" value="${esc(k.dob)}"></label><label>School they attend<input id="${p}school" value="${esc(k.school)}"></label></div>
+  <label>Medical conditions<textarea id="${p}med" placeholder="Leave blank if none">${esc(k.med)}</textarea></label>
+  <div class="grid2"><label>Allergies<input id="${p}allergy" value="${esc(k.allergy)}" placeholder="Leave blank if none"></label><label>SEND or support needs<input id="${p}send" value="${esc(k.send)}" placeholder="Leave blank if none"></label></div>
+  <label>Who can collect them?<input id="${p}collect" value="${esc(k.collect)}" placeholder="Names of adults allowed to collect"></label>
+  <div style="display:grid;gap:.4rem"><span style="font-weight:700;font-size:.85rem">Can we use photos of them on social media?</span><div class="seg" data-seg="${p}"><button type="button" class="${k.photo==="yes"?"on":""}" data-photo="yes">Yes, that's fine</button><button type="button" class="${k.photo==="no"?"on":""}" data-photo="no">No photos please</button></div></div></div>`}
+function parentForm(p){return `<div class="card"><h3>About you</h3><div class="grid2"><label>Full name<input id="p_name" value="${esc(p.name)}"></label><label>Mobile number<input id="p_phone" type="tel" value="${esc(p.phone)}"></label></div>
+  <label>Email<input id="p_email" type="email" value="${esc(p.email)}"><span class="hint">Your confirmation and receipts go here.</span></label></div>
+  <div class="card"><h3>Emergency contact</h3><p class="hint">Someone other than you, in case we can't reach you.</p>
+  <div class="grid2"><label>Name<input id="p_ename" value="${esc(p.ename)}"></label><label>Phone<input id="p_ephone" type="tel" value="${esc(p.ephone)}"></label></div>
+  <label>Relationship to the child<input id="p_erel" value="${esc(p.erel)}" placeholder="e.g. Grandparent"></label></div>`}
+function basketBook(){
+  const c=camp(),q=quote();$("bTotal").textContent=gbp(q.total||0);
+  if(!c)return `<h3>Your basket</h3><p class="muted">Pick a camp to get started.</p><div class="trust"><span>✓ Secure card payments</span><span>✓ Pay in instalments on camps booked early</span><span>✓ Sibling discount applied automatically</span></div>`;
+  const today=S.plan==="full"||S.step<3?null:schedule(q.total,+S.plan)[0][1];
+  return `<h3>Your basket</h3><div style="display:flex;gap:.7rem;align-items:center"><span class="av" style="background:var(--black);color:var(--gold);font-family:var(--display)">${c.init}</span><div><b>${esc(c.school)}</b><p class="hint">${esc(c.area)} · ${c.times}</p></div></div>
+  ${S.days.length?`<div class="chips">${S.days.map(d=>`<span class="chip">${fmt(d,{weekday:"short",day:"numeric",month:"short"})}</span>`).join("")}</div>`:`<p class="hint">No days picked yet.</p>`}
+  ${q.lines.map(l=>`<div class="line"><span>${esc(l[0])}</span><span>${gbp(l[1])}</span></div>`).join("")}
+  ${q.disc.map(l=>`<div class="line disc"><span>${esc(l[0])}</span><span>−${gbp(l[1])}</span></div>`).join("")}
+  <div class="line total"><span>Total</span><span>${gbp(q.total)}</span></div>
+  ${today!=null?`<div class="today"><span>Due today</span><span>${gbp(today)}</span></div>`:""}`}
+
+function stageSubs(){
+  const s=SUBS.find(x=>x.id===M.sub),STP=["Choose a membership","Player details","Your details","Payment","Confirmed"];
+  if(M.step===0)return `${progress(0,STP)}<h1>Memberships</h1><p class="muted">Monthly plans that renew automatically. Cancel any time before your next payment.</p>
+    <div class="subs">${SUBS.map(x=>`<div class="sub${x.id===M.sub?" on":""}"><div class="chips"><span class="chip gold">${x.tag}</span><span class="chip">Ages ${x.ages}</span><span class="ex">Example prices</span></div>
+      <h2>${x.name}</h2><p class="muted">${x.blurb}</p>
+      <div class="tier">${x.tiers.map((t,i)=>`<button type="button" class="${x.id===M.sub&&M.tier===i?"on":""}" data-sub="${x.id}" data-tier="${i}"><span>${t[0]}</span><b>${gbp(t[1])}/mo</b></button>`).join("")}</div>
+      <ul>${x.perks.map(p=>`<li>${p}</li>`).join("")}</ul></div>`).join("")}</div>
+    <button class="btn gold block" type="button" id="mnext" ${s?"":"disabled"}>Continue</button>`;
+  if(M.step===1)return `${progress(1,STP)}<h1>Who's joining?</h1>${kidForm(M.kid,"m",0,false)}<p class="err" id="err"></p><div class="row"><button type="button" class="btn ghost" id="mback">Back</button><button type="button" class="btn gold" id="mnext">Continue</button></div>`;
+  if(M.step===2)return `${progress(2,STP)}<h1>Your details</h1>${parentForm(M.parent)}<p class="err" id="err"></p><div class="row"><button type="button" class="btn ghost" id="mback">Back</button><button type="button" class="btn gold" id="mnext">Continue to payment</button></div>`;
+  if(M.step===3){const t=s.tiers[M.tier];return `${progress(3,STP)}<h1>Start your membership</h1>
+    <div class="sched"><div><span>First payment today</span><b>${gbp(t[1])}</b></div><div><span>Then every month on the</span><b>${TODAY.getDate()}st</b></div><div><span>Next payment</span><span>${addMonths(TODAY,1).toLocaleDateString("en-GB",{day:"numeric",month:"long"})}</span></div></div>
+    <div class="pay-box"><div class="row"><b>Card details</b><div class="cardrow"><span>VISA</span><span>Mastercard</span><span>Apple Pay</span></div></div><p class="hint">In the live version, Stripe saves the card securely and takes each monthly payment automatically.</p></div>
+    <label class="chk"><input type="checkbox" id="mterms" ${M.terms?"checked":""}><span>I agree to the membership terms and authorise a monthly payment of ${gbp(t[1])} until I cancel.</span></label>
+    <p class="err" id="err"></p><div class="row"><button type="button" class="btn ghost" id="mback">Back</button><button type="button" class="btn gold" id="mpay">Start membership · ${gbp(t[1])}/mo</button></div>`}
+  return `<div class="card done"><div class="tick">✓</div><h1>Welcome to ${esc(s.name)}!</h1><span class="ref">${M.ref}</span><p class="muted" style="max-width:46ch">${esc(M.kid.first)} is signed up. Parents can pause or cancel from their account in the live version.</p><button type="button" class="btn gold" id="magain">Done</button></div>`;
+}
+function basketSubs(){const s=SUBS.find(x=>x.id===M.sub);if(!s)return `<h3>Your membership</h3><p class="muted">Choose a plan to get started.</p><div class="trust"><span>✓ Monthly, no contract</span><span>✓ Cancel any time</span></div>`;
+  const t=s.tiers[M.tier];return `<h3>Your membership</h3><b>${esc(s.name)}</b><p class="hint">${t[0]}</p><div class="line total"><span>Monthly</span><span>${gbp(t[1])}</span></div><div class="today"><span>Due today</span><span>${gbp(t[1])}</span></div>`}
+
+function readKid(k,p){Object.keys(k).forEach(f=>{const el=$(p+f);if(el)k[f]=el.value.trim()})}
+function readParent(o){Object.keys(o).forEach(f=>{const el=$("p_"+f);if(el)o[f]=el.value.trim()})}
+const fail=m=>{$("err").textContent=m;$("err").scrollIntoView({block:"center",behavior:"smooth"});return false};
+function checkKid(k,label,c,ref){if(!k.first||!k.last)return fail(label+": add their first name and surname.");if(!k.dob)return fail(label+": add their date of birth.");
+  if(c){const a=ageOn(k.dob,ref);if(a<c.min||a>c.max)return fail(`${k.first} will be ${a} on the first day. This camp is for ages ${c.ages}.`)}
+  if(!k.collect)return fail(label+": tell us who can collect them.");if(!k.photo)return fail(label+": choose a photo option.");return true}
+function checkParent(p){if(!p.name||!p.phone)return fail("Add your name and mobile number.");if(!/^\S+@\S+\.\S+$/.test(p.email))return fail("Enter a valid email so we can send your confirmation.");if(!p.ename||!p.ephone)return fail("Add an emergency contact name and phone number.");return true}
+
+function render(){$("stage").innerHTML=stageBook();$("basket").innerHTML=basketBook();$("subStage").innerHTML=stageSubs();$("subBasket").innerHTML=basketSubs()}
+const toTop=()=>window.scrollTo({top:0,behavior:"smooth"});
+
+$("stage").addEventListener("input",e=>{if(e.target.id==="q"){S.q=e.target.value;const pos=e.target.selectionStart;render();const q=$("q");q.focus();q.setSelectionRange(pos,pos)}});
+$("stage").addEventListener("click",e=>{
+  const t=e.target.closest("button");if(!t)return;
+  if(t.dataset.camp){S.camp=t.dataset.camp;S.days=[];render();$("dayCard")?.scrollIntoView({behavior:"smooth",block:"start"});return}
+  if(t.dataset.day){const d=t.dataset.day;S.days=S.days.includes(d)?S.days.filter(x=>x!==d):[...S.days,d].sort();render();return}
+  if(t.id==="allDays"){S.days=camp().days.filter(d=>d[1]-d[2]>0).map(d=>d[0]);render();return}
+  if(S.step===1)S.kids.forEach((k,i)=>readKid(k,"c"+i));
+  if(S.step===2)readParent(S.parent);
+  if(S.step===3){S.terms=$("terms").checked;S.code=$("code").value.trim()}
+  if(t.dataset.photo){const i=+t.closest(".seg").dataset.seg.slice(1);S.kids[i].photo=t.dataset.photo;render();return}
+  if(t.dataset.rm){S.kids.splice(+t.dataset.rm,1);render();return}
+  if(t.dataset.plan){S.plan=t.dataset.plan;render();return}
+  if(t.id==="addKid"){S.kids.push(blankKid());render();return}
+  if(t.id==="back"){S.step--;render();toTop();return}
+  if(t.id==="applyCode"){const k=S.code.toUpperCase();S.codeOk=CODES[k]?k:(S.code?false:null);render();return}
+  if(t.id==="next"){const c=camp();if(S.step===1&&!S.kids.every((k,i)=>checkKid(k,"Child "+(i+1),c,S.days[0])))return;if(S.step===2&&!checkParent(S.parent))return;S.step++;render();toTop();return}
+  if(t.id==="pay"){if(!S.terms)return fail("Tick the box to agree to the booking terms.");
+    S.ref="PS-"+Math.random().toString(36).slice(2,7).toUpperCase();const c=camp();
+    S.kids.forEach(k=>bookings.push({camp:c.id,days:[...S.days],name:k.first+" "+k.last,age:ageOn(k.dob,S.days[0]),med:[k.med,k.allergy,k.send].filter(Boolean).join(" · "),photo:k.photo==="yes",collect:k.collect,phone:S.parent.phone,plan:S.plan}));
+    S.step=4;render();toTop();return}
+  if(t.id==="seeReg"){regCamp=S.camp;regDay=S.days[0];show("admin");return}
+  if(t.id==="again"){S={...S,step:0,camp:null,days:[],kids:[blankKid()],code:"",codeOk:null,plan:"full",terms:false,ref:null};render();toTop()}
+});
+$("subStage").addEventListener("click",e=>{
+  const t=e.target.closest("button");if(!t)return;
+  if(M.step===1)readKid(M.kid,"m");if(M.step===2)readParent(M.parent);if(M.step===3)M.terms=$("mterms").checked;
+  if(t.dataset.sub){M.sub=t.dataset.sub;M.tier=+t.dataset.tier;render();return}
+  if(t.dataset.photo){M.kid.photo=t.dataset.photo;render();return}
+  if(t.id==="mback"){M.step--;render();toTop();return}
+  if(t.id==="mnext"){if(M.step===1&&!checkKid(M.kid,"Player"))return;if(M.step===2&&!checkParent(M.parent))return;M.step++;render();toTop();return}
+  if(t.id==="mpay"){if(!M.terms)return fail("Tick the box to authorise the monthly payment.");const s=SUBS.find(x=>x.id===M.sub);
+    M.ref="PM-"+Math.random().toString(36).slice(2,7).toUpperCase();members.push({name:M.kid.first+" "+M.kid.last,plan:s.name,tier:s.tiers[M.tier][0],amt:s.tiers[M.tier][1],next:addMonths(TODAY,1),phone:M.parent.phone});M.step=4;render();toTop();return}
+  if(t.id==="magain"){M={step:0,sub:null,tier:0,kid:blankKid(),parent:blankParent(),terms:false,ref:null};render();toTop()}
+});
+
+let regCamp="bga",regDay=null,adminTab="reg";
+function renderAdmin(){
+  const c=CAMPS.find(x=>x.id===regCamp);if(!regDay||!c.days.some(d=>d[0]===regDay))regDay=c.days[0][0];
+  const rows=[...EXAMPLES.map(x=>({...x,ex:true})),...bookings.filter(b=>b.camp===c.id&&b.days.includes(regDay))];
+  const tabs=`<div class="pills"><button type="button" class="${adminTab==="reg"?"on":""}" data-at="reg">Camp register</button><button type="button" class="${adminTab==="mem"?"on":""}" data-at="mem">Members</button></div>`;
+  if(adminTab==="mem"){$("admin").innerHTML=`${tabs}<h2>Active memberships</h2>${members.length?`<div class="table-wrap"><table><thead><tr><th>Player</th><th>Membership</th><th>Plan</th><th>Monthly</th><th>Next payment</th></tr></thead><tbody>${members.map(m=>`<tr><td><b>${esc(m.name)}</b></td><td>${esc(m.plan)}</td><td>${esc(m.tier)}</td><td>${gbp(m.amt)}</td><td>${m.next.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</td></tr>`).join("")}</tbody></table></div>`:`<p class="muted">No members yet. Sign someone up in the Memberships tab and they'll appear here.</p>`}`;return}
+  $("admin").innerHTML=`${tabs}<div class="row"><div><h2>${esc(c.school)}</h2><p class="muted">${rows.length} children · ${rows.filter(r=>r.med).length} with medical needs</p></div>
+  <select id="regCamp" style="max-width:260px">${CAMPS.map(k=>`<option value="${k.id}" ${k.id===regCamp?"selected":""}>${esc(k.school)}</option>`).join("")}</select></div>
+  <div class="pills">${c.days.map(d=>`<button type="button" class="${d[0]===regDay?"on":""}" data-rd="${d[0]}">${fmt(d[0],{weekday:"short",day:"numeric",month:"short"})}</button>`).join("")}</div>
+  <div class="table-wrap"><table><thead><tr><th>Child</th><th>Age</th><th>Medical / allergies</th><th>Photos</th><th>Collected by</th><th>Parent phone</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td><b>${esc(r.name)}</b>${r.ex?` <span class="ex">Example</span>`:""}${r.plan&&r.plan!=="full"?` <span class="tag ph">${r.plan} instalments</span>`:""}</td><td>${r.age}</td><td>${r.med?`<span class="tag med">${esc(r.med)}</span>`:`<span class="muted">None</span>`}</td><td>${r.photo?`<span class="tag ok">Yes</span>`:`<span class="tag ph">No photos</span>`}</td><td>${esc(r.collect)}</td><td>${esc(r.phone)}</td></tr>`).join("")}</tbody></table></div>`;
+}
+$("admin").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.rd){regDay=b.dataset.rd;renderAdmin()}if(b.dataset.at){adminTab=b.dataset.at;renderAdmin()}});
+$("admin").addEventListener("change",e=>{if(e.target.id==="regCamp"){regCamp=e.target.value;regDay=null;renderAdmin()}});
+
+const F=[["ok","Search camps by town or school"],["ok","Pick single days with live spaces left"],["ok","Multiple children, sibling discount"],["ok","Age check against the camp's age range"],["ok","Medical, allergies, SEND, collection and photo consent"],["ok","Discount codes"],["ok","Instalment plans, finishing before the camp starts"],["ok","Monthly memberships with tiers"],["ok","Staff register with medical and photo flags"],
+["ph","Stripe card, Apple Pay and Google Pay"],["ph","Stripe subscriptions and instalment schedules"],["ph","Parent accounts: rebook, update details, cancel memberships"],["ph","Confirmation, reminder and failed-payment emails"],["ph","Admin area: camps, capacity, prices, codes"],["ph","Cancellations and refunds"],["ph","Secure storage of children's data (UK GDPR)"],
+["med","Waiting lists"],["med","Tax-Free Childcare and voucher payments"],["med","Sign-in and sign-out on a phone"],["med","Bookings and revenue reports"]];
+$("feat").innerHTML=F.map(f=>`<div><span class="tag ${f[0]} st">${{ok:"In prototype",ph:"Build for January",med:"After launch"}[f[0]]}</span><b>${f[1]}</b></div>`).join("");
+
+function show(v){document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("on",x.dataset.v===v));["book","subs","admin","plan"].forEach(x=>$("v-"+x).hidden=x!==v);if(v==="admin")renderAdmin();toTop()}
+$("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b)show(b.dataset.v)});
+$("basketBtn").onclick=()=>{show("book");setTimeout(()=>$("basket").scrollIntoView({behavior:"smooth"}),50)};
+render();
+</script>

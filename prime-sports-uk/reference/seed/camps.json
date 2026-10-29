@@ -1,0 +1,4 @@
+[
+  {"school":"Bowling Green Academy","area":"Halifax","ages":"4 to 11","age_min":4,"age_max":11,"dates":["2026-10-27","2026-10-28","2026-10-29"],"times":"9am – 3pm","price_per_day_gbp":22,"logo":"images/school-logo-bowling-green.png","note":"October 2026 half-term camp, already run. Seed as a past camp for testing."},
+  {"school":"Thornton Primary School","area":"Bradford","ages":"4 to 11","age_min":4,"age_max":11,"dates":["2026-10-26","2026-10-27","2026-10-28"],"times":"9am – 3pm","price_per_day_gbp":15,"logo":"images/school-logo-thornton.png","note":"October 2026 half-term camp, already run. Seed as a past camp for testing."}
+]

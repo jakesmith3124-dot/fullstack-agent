@@ -1,0 +1,298 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Prime Camps App</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Nunito+Sans:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: phone app shell matching the Prime Sports UK site — black header band, cream ground, gold pills, bottom tab bar */
+:root{
+  --bg:#f7f5f0; --surface:#ffffff; --ink:#111111; --muted:#5c574d;
+  --navy:#0b0b0b; --accent:#d4a72c; --accent-ink:#0b0b0b; --line:#e6e0d3;
+  --soft:#cfc6b4; --ok:#1f7a3a; --okbg:#e3f3e7; --warnbg:#fdf0e1; --warn:#8a4a0f;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"Nunito Sans",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121212; --surface:#1c1b19; --ink:#f3efe6; --muted:#b3ab9b; --navy:#000000; --line:#2e2b25; --okbg:#173322; --ok:#7fd69a; --warnbg:#3a2a15; --warn:#f2c48a; color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121212; --surface:#1c1b19; --ink:#f3efe6; --muted:#b3ab9b; --navy:#000000; --line:#2e2b25; --okbg:#173322; --ok:#7fd69a; --warnbg:#3a2a15; --warn:#f2c48a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+.app{max-width:480px;margin:0 auto;padding-bottom:96px}
+.pad{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);text-transform:uppercase;line-height:1.02;margin:0;text-wrap:balance}
+h1{font-size:2.3rem;font-weight:800}h2{font-size:1.6rem;font-weight:800}h3{font-size:1.25rem;font-weight:600}
+p{margin:0}
+.eyebrow{font:800 .74rem var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:48px;padding:.7em 1.4em;border-radius:999px;font:800 1rem var(--body);border:0;cursor:pointer;background:var(--accent);color:var(--accent-ink);text-decoration:none}
+.btn.dark{background:var(--navy);color:#fff}
+.btn.ghost{background:transparent;border:2px solid currentColor;color:inherit}
+.btn.full{width:100%}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+.top{background:var(--navy);color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.top .pad{display:flex;align-items:center;justify-content:space-between;padding-block:.6rem}
+.brand{display:flex;align-items:center;gap:.6rem}
+.brand img{height:40px;width:auto}
+.brand b{font:800 1.3rem var(--display);text-transform:uppercase;letter-spacing:.02em}
+.brand b span{color:var(--accent)}
+.icon-btn{width:44px;height:44px;border-radius:50%;border:1px solid rgba(212,167,44,.5);background:#141414;color:#fff;display:grid;place-items:center;cursor:pointer;position:relative}
+.icon-btn .dot{position:absolute;top:8px;right:9px;width:9px;height:9px;border-radius:50%;background:var(--accent)}
+
+.hero{background:var(--navy);color:#fff}
+.hero .pad{padding-block:1rem 1.6rem;display:grid;gap:.9rem}
+.hero p{color:var(--soft)}
+.kid-switch{display:flex;gap:.5rem;flex-wrap:wrap}
+.kid{border:1px solid rgba(212,167,44,.5);background:transparent;color:#fff;border-radius:999px;padding:.4rem 1rem;font:700 .9rem var(--body);cursor:pointer;min-height:40px}
+.kid.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.status{display:flex;align-items:center;gap:.8rem;background:#141414;border:1px solid rgba(212,167,44,.35);border-radius:18px;padding:.8rem 1rem}
+.status .live{width:12px;height:12px;border-radius:50%;background:#4ade80;flex:none;box-shadow:0 0 0 4px rgba(74,222,128,.2)}
+.status div{display:grid;min-width:0}
+.status small{color:var(--soft)}
+
+main section{padding-block:1.4rem 0;display:grid;gap:1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:1.2rem}
+.row-between{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+.muted{color:var(--muted)}
+
+.timeline{list-style:none;margin:0;padding:0;border-left:3px solid var(--accent);display:grid}
+.timeline li{display:grid;grid-template-columns:3.6rem 1fr;gap:.8rem;padding:.65rem 0 .65rem 1rem;position:relative}
+.timeline li::before{content:"";position:absolute;left:-9px;top:1rem;width:15px;height:15px;border-radius:50%;background:var(--surface);border:3px solid var(--accent)}
+.timeline li.now::before{background:var(--accent)}
+.timeline li.done{opacity:.55}
+.timeline time{font:800 1.2rem/1.2 var(--display);font-variant-numeric:tabular-nums}
+.timeline span{color:var(--muted);font-size:.9rem;display:block}
+.tag{display:inline-block;background:var(--accent);color:var(--accent-ink);font:800 .7rem var(--body);letter-spacing:.1em;text-transform:uppercase;padding:.2rem .6rem;border-radius:999px;vertical-align:middle;margin-left:.3rem}
+
+.hwbt{background:var(--navy);color:#fff;border-radius:22px;padding:1.3rem;display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center}
+.hwbt b{font:800 2.4rem/1 var(--display);color:var(--accent);letter-spacing:.06em}
+.hwbt p{color:var(--soft)}
+
+.chips{display:flex;gap:.5rem;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:.45rem 1rem;font:700 .88rem var(--body);cursor:pointer;min-height:40px}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.post{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.post .ph{aspect-ratio:16/10;max-width:100%;display:grid;place-items:center;font:800 1rem var(--display);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+.ph.p1{background:linear-gradient(135deg,#2b2b2b,#000)}.ph.p2{background:linear-gradient(135deg,#e2b843,#9c7414);color:rgba(0,0,0,.55)}
+.post .body{padding:1rem 1.2rem 1.2rem;display:grid;gap:.5rem}
+.post .acts{display:flex;gap:.5rem;flex-wrap:wrap}
+.mini{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:.4rem .9rem;font:700 .85rem var(--body);cursor:pointer;min-height:40px}
+.mini.on{border-color:var(--accent);color:var(--accent)}
+.note{display:grid;grid-template-columns:44px 1fr;gap:.8rem;align-items:start}
+.av{width:44px;height:44px;border-radius:50%;background:var(--navy);color:var(--accent);border:2px solid var(--accent);display:grid;place-items:center;font:800 1rem var(--display)}
+
+.pass{background:var(--navy);color:#fff;border-radius:26px;padding:1.4rem;display:grid;justify-items:center;gap:.8rem;text-align:center;border:1px solid rgba(212,167,44,.5)}
+.pass small{color:var(--soft);letter-spacing:.14em;text-transform:uppercase;font-weight:800;font-size:.72rem}
+.qr{width:190px;height:190px;max-width:100%;background:#fff;border-radius:14px;padding:12px}
+.code{font:800 1.6rem var(--display);letter-spacing:.2em;color:var(--accent)}
+.pick{display:grid;gap:.5rem}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:1rem;min-height:56px;padding:.6rem 1rem;border-radius:16px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;text-align:left}
+.opt.on{border-color:var(--accent)}
+.opt small{color:var(--muted)}
+.radio{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex:none}
+.opt.on .radio{border:7px solid var(--accent)}
+.late{display:grid;gap:.8rem}
+.late-times{display:flex;gap:.5rem;flex-wrap:wrap}
+
+.kidhead{display:flex;gap:1rem;align-items:center}
+.kidhead .av{width:64px;height:64px;font-size:1.6rem;border-width:3px}
+.alert{background:var(--warnbg);color:var(--warn);border:1px dashed #d59a5c;border-radius:18px;padding:1rem;display:flex;gap:1rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.alert.ok{background:var(--okbg);color:var(--ok);border-color:transparent}
+.list{display:grid}
+.list > div{display:flex;justify-content:space-between;gap:1rem;padding:.85rem 0;border-bottom:1px solid var(--line)}
+.list > div:last-child{border-bottom:0}
+.good{color:var(--ok);font-weight:800;font-size:.9rem}
+.form{display:grid;gap:.8rem}
+.form label{display:grid;gap:.3rem;font-weight:700;font-size:.9rem}
+.form input{font:1rem var(--body);padding:.75rem .9rem;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.chk{display:flex;gap:.6rem;align-items:flex-start;font-weight:600}
+.chk input{width:22px;height:22px;flex:none;accent-color:#d4a72c}
+.err{color:#c0392b;font-weight:700;font-size:.9rem}.err:empty{display:none}
+
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--navy);border-top:1px solid rgba(212,167,44,.35);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs .in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+.tabs button{background:none;border:0;color:var(--soft);font:700 .75rem var(--body);display:grid;justify-items:center;gap:.2rem;padding:.6rem 0 .7rem;cursor:pointer;min-height:56px}
+.tabs button.on{color:var(--accent)}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-weight:800;padding:.7rem 1.2rem;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:7;max-width:calc(100% - 32px)}
+.proto{font-size:.8rem;color:var(--muted);text-align:center;padding-block:1.6rem 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <header class="top"><div class="pad">
+    <div class="brand"><img src="prime-camps-logo.png" alt="" width="37" height="40"><b>Prime <span>Camps</span></b></div>
+    <button class="icon-btn" id="bell" aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot"></span></button>
+  </div></header>
+
+  <div class="hero"><div class="pad">
+    <div class="kid-switch" id="kidSwitch"></div>
+    <h1 id="heroTitle"></h1>
+    <div class="status"><span class="live" aria-hidden="true"></span><div><b id="statusLine"></b><small>[CAMP VENUE] · Coach [NAME]</small></div></div>
+  </div></div>
+
+  <main class="pad">
+    <!-- TODAY -->
+    <div id="v-today">
+      <section>
+        <div class="row-between"><h2>Today at camp</h2><span class="muted">Day 2 of 4</span></div>
+        <div class="card"><ol class="timeline" id="sched"></ol></div>
+        <div class="hwbt"><b>HWBT</b><p id="hwbtLine"></p></div>
+        <button class="btn full" data-go="updates">See today's photos →</button>
+      </section>
+    </div>
+
+    <!-- UPDATES -->
+    <div id="v-updates" hidden>
+      <section>
+        <h2>Live updates</h2>
+        <div class="chips" id="filters"></div>
+        <div id="feed" style="display:grid;gap:1rem"></div>
+      </section>
+    </div>
+
+    <!-- PICKUP -->
+    <div id="v-pickup" hidden>
+      <section>
+        <div><h2>Pickup</h2><p class="muted">Camp finishes at 4:00pm today</p></div>
+        <div class="pass">
+          <small>Show this at the gate</small>
+          <canvas class="qr" id="qr" width="166" height="166" role="img" aria-label="Pickup pass code"></canvas>
+          <div class="code" id="passCode"></div>
+          <h3 id="passName"></h3>
+        </div>
+        <h3>Who's collecting today?</h3>
+        <div class="pick" id="collectors"></div>
+        <div class="card late">
+          <h3>Running late?</h3>
+          <p class="muted">Let the coaches know so your child isn't left waiting.</p>
+          <div class="late-times" id="lateTimes"></div>
+          <button class="btn dark full" id="lateBtn">Tell the coaches</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- CHILD -->
+    <div id="v-child" hidden>
+      <section>
+        <div class="kidhead"><div class="av" id="kidAv"></div><div><h2 id="kidName"></h2><p class="muted" id="kidMeta"></p></div></div>
+        <div id="formAlert"></div>
+        <div class="card" id="signCard" hidden>
+          <form class="form" id="signForm" novalidate>
+            <h3>Photo &amp; activity consent</h3>
+            <p class="muted">Needed before the next camp. It covers photos in the parent feed and taking part in archery and fencing.</p>
+            <label class="chk" for="c1"><input type="checkbox" id="c1"><span>I agree to photos of my child appearing in the private parent feed</span></label>
+            <label class="chk" for="c2"><input type="checkbox" id="c2"><span>I agree to my child taking part in specialist sports</span></label>
+            <label for="sigName">Type your full name to sign<input id="sigName" autocomplete="name"></label>
+            <p class="err" id="sigErr"></p>
+            <button class="btn" type="submit">Sign form</button>
+          </form>
+        </div>
+        <div class="card">
+          <h3>Saved details</h3>
+          <div class="list">
+            <div><span>Medical &amp; allergies</span><span class="good">Up to date</span></div>
+            <div><span>Emergency contacts</span><span class="good">2 saved</span></div>
+            <div><span>Photo consent</span><span class="good" id="consentState"></span></div>
+            <div><span>Approved collectors</span><span class="muted">2 people</span></div>
+          </div>
+          <p class="muted" style="font-size:.9rem;margin-top:.6rem">Filled in once, reused for every camp you book.</p>
+        </div>
+        <div class="card" style="display:grid;gap:.4rem">
+          <span class="eyebrow">Next camp</span>
+          <h3>[HOLIDAY] Camp</h3>
+          <p class="muted">[DATES] · [VENUE]</p>
+          <span class="tag" style="justify-self:start;margin:0">Booked</span>
+        </div>
+      </section>
+    </div>
+    <p class="proto">Prototype · sample children and placeholder details</p>
+  </main>
+</div>
+
+<nav class="tabs" aria-label="App sections"><div class="in" id="tabs"></div></nav>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+const ICONS={today:'<path d="M3 10h18M8 3v4M16 3v4"/><rect x="3" y="5" width="18" height="16" rx="3"/>',updates:'<rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="12" cy="12" r="3.5"/>',pickup:'<path d="M5 12h14M13 6l6 6-6 6"/>',child:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'};
+const TABS=[['today','Today'],['updates','Updates'],['pickup','Pickup'],['child','Child']];
+const KIDS=[
+ {id:'a',name:'Alfie',age:9,group:'Juniors',in:'8:42am',award:'Alfie earned today\'s Hard Work award in football drills.',signed:false},
+ {id:'m',name:'Maisie',age:6,group:'Minis',in:'8:44am',award:'Maisie was picked as Star of the Day for team challenges.',signed:true}
+];
+const SCHED=[['8:30','Drop-off and free play','Signed in by name'],['9:30','Morning sport sessions','Football and basketball'],['12:00','Lunch','Packed lunch, supervised'],['12:45','Archery','Specialist sport'],['2:30','Tournament time','Dodgeball, with medals'],['3:30','Cool-down and awards','Star of the day'],['4:00','Collection','Signed out to an approved adult']];
+const NOW_IDX=3;
+const FEED=[
+ {k:'photo',t:'12:58',title:'Archery is underway',text:'First arrows of the week. Everyone had a go, and there were a few bullseyes already.',ph:'p2'},
+ {k:'note',t:'12:05',title:'Coach note',text:'Lunch done. It\'s warming up, so please pack sun cream for tomorrow.'},
+ {k:'photo',t:'10:24',title:'Football drills',text:'Big energy this morning. Juniors worked on first touch and passing under pressure.',ph:'p1'},
+ {k:'check',t:'8:42',title:'Checked in',text:'Signed in at the gate.'}
+];
+const COLLECTORS=[['[PARENT NAME]','Parent'],['[GRANDPARENT]','Approved adult'],['Someone else','One-off, we\'ll ask for their name']];
+const S={tab:'today',kid:0,filter:'all',saved:{},collector:0,late:'10 mins'};
+try{const t=localStorage.getItem('pc-tab');if(t)S.tab=t}catch(e){}
+const $=id=>document.getElementById(id);
+const kid=()=>KIDS[S.kid];
+let tt;function toast(m){const el=$('toast');el.textContent=m;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,2400)}
+
+function renderTabs(){
+ $('tabs').innerHTML=TABS.map(([k,l])=>`<button data-tab="${k}" class="${S.tab===k?'on':''}" aria-current="${S.tab===k?'page':'false'}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">${ICONS[k]}</svg>${l}</button>`).join('');
+ TABS.forEach(([k])=>$('v-'+k).hidden=S.tab!==k);
+}
+function renderHero(){
+ $('kidSwitch').innerHTML=KIDS.map((c,i)=>`<button class="kid ${i===S.kid?'on':''}" data-kid="${i}">${c.name}</button>`).join('');
+ $('heroTitle').textContent=kid().name+' is checked in';
+ $('statusLine').textContent='Arrived '+kid().in;
+}
+function renderToday(){
+ $('sched').innerHTML=SCHED.map(([t,a,b],i)=>`<li class="${i<NOW_IDX?'done':i===NOW_IDX?'now':''}"><time>${t}</time><div><b>${a}</b>${i===NOW_IDX?'<span class="tag">Now</span>':''}<span>${b}</span></div></li>`).join('');
+ $('hwbtLine').textContent=kid().award;
+}
+function renderFeed(){
+ const f=[['all','All'],['photo','Photos'],['note','Coach notes']];
+ $('filters').innerHTML=f.map(([k,l])=>`<button class="chip ${S.filter===k?'on':''}" data-filter="${k}">${l}</button>`).join('');
+ $('feed').innerHTML=FEED.map((p,i)=>({...p,i})).filter(p=>S.filter==='all'||p.k===S.filter).map(p=>{
+  if(p.k==='photo')return `<article class="post"><div class="ph ${p.ph}">Camp photo</div><div class="body"><div class="row-between"><h3>${p.title}</h3><span class="muted">${p.t}</span></div><p class="muted">${p.text}</p><div class="acts"><button class="mini ${S.saved[p.i]?'on':''}" data-save="${p.i}">${S.saved[p.i]?'Saved ✓':'Save photo'}</button></div></div></article>`;
+  return `<article class="card note"><div class="av">${p.k==='check'?'✓':'PC'}</div><div><div class="row-between"><b>${p.k==='check'?kid().name+' '+p.title.toLowerCase():p.title}</b><span class="muted">${p.k==='check'?kid().in.replace('am',''):p.t}</span></div><p class="muted">${p.text}</p></div></article>`;
+ }).join('');
+}
+function drawQR(seed){
+ const c=$('qr'),x=c.getContext('2d'),n=21,s=c.width/n;x.fillStyle='#fff';x.fillRect(0,0,c.width,c.width);x.fillStyle='#0b0b0b';
+ let r=seed;const rnd=()=>(r=(r*9301+49297)%233280)/233280;
+ for(let i=0;i<n;i++)for(let j=0;j<n;j++){const f=(i<7&&j<7)||(i<7&&j>13)||(i>13&&j<7);if(f)continue;if(rnd()>.5)x.fillRect(j*s,i*s,s,s)}
+ [[0,0],[0,14],[14,0]].forEach(([a,b])=>{x.fillRect(b*s,a*s,7*s,7*s);x.fillStyle='#fff';x.fillRect((b+1)*s,(a+1)*s,5*s,5*s);x.fillStyle='#d4a72c';x.fillRect((b+2)*s,(a+2)*s,3*s,3*s);x.fillStyle='#0b0b0b'});
+}
+function renderPickup(){
+ $('passName').textContent=kid().name+' · '+kid().group;
+ $('passCode').textContent=kid().id==='a'?'PC-4821':'PC-4822';
+ drawQR(kid().id==='a'?17:42);
+ $('collectors').innerHTML=COLLECTORS.map(([n,r],i)=>`<button class="opt ${S.collector===i?'on':''}" data-col="${i}" aria-pressed="${S.collector===i}"><span style="display:grid"><b>${n}</b><small>${r}</small></span><span class="radio" aria-hidden="true"></span></button>`).join('');
+ $('lateTimes').innerHTML=['10 mins','20 mins','30+ mins'].map(t=>`<button class="chip ${S.late===t?'on':''}" data-late="${t}">${t}</button>`).join('');
+}
+function renderChild(){
+ const k=kid();$('kidAv').textContent=k.name[0];$('kidName').textContent=k.name;$('kidMeta').textContent='Age '+k.age+' · '+k.group;
+ $('formAlert').innerHTML=k.signed?'<div class="alert ok"><b>All forms signed</b><span>Ready for the next camp</span></div>':'<div class="alert"><b>1 form needs signing</b><button class="btn" id="openSign" style="min-height:44px">Sign now</button></div>';
+ $('signCard').hidden=true;$('consentState').textContent=k.signed?'Given':'Needed';$('consentState').className=k.signed?'good':'muted';
+}
+function all(){renderTabs();renderHero();renderToday();renderFeed();renderPickup();renderChild()}
+
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.tab||b.dataset.go){S.tab=b.dataset.tab||b.dataset.go;try{localStorage.setItem('pc-tab',S.tab)}catch(e){};renderTabs();window.scrollTo(0,0)}
+ else if(b.dataset.kid){S.kid=+b.dataset.kid;all()}
+ else if(b.dataset.filter){S.filter=b.dataset.filter;renderFeed()}
+ else if(b.dataset.save){S.saved[b.dataset.save]=!S.saved[b.dataset.save];renderFeed();toast(S.saved[b.dataset.save]?'Photo saved':'Removed from saved')}
+ else if(b.dataset.col){S.collector=+b.dataset.col;renderPickup();toast(COLLECTORS[S.collector][0]+' is collecting')}
+ else if(b.dataset.late){S.late=b.dataset.late;renderPickup()}
+ else if(b.id==='lateBtn')toast('Coaches told you\'re '+S.late+' late')
+ else if(b.id==='openSign'){$('signCard').hidden=false;$('c1').focus()}
+ else if(b.id==='bell')toast('No new notifications')
+});
+$('signForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ if(!$('c1').checked||!$('c2').checked){$('sigErr').textContent='Tick both boxes to give consent.';return}
+ if($('sigName').value.trim().split(/\s+/).length<2){$('sigErr').textContent='Type your first and last name to sign.';return}
+ $('sigErr').textContent='';kid().signed=true;$('signForm').reset();renderChild();toast('Form signed');
+});
+all();
+</script>
+
+</body></html>
