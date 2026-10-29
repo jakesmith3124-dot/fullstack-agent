@@ -61,7 +61,7 @@ export function bookingEmailData(b: BookingSummary): BookingEmailData {
   if (b.sibling_discount_pence) lines.push(["Sibling discount", `−${gbp(b.sibling_discount_pence)}`]);
   if (b.code_discount_pence) lines.push(["Discount code", `−${gbp(b.code_discount_pence)}`]);
   return {
-    ref: b.ref,
+    reference: b.ref,
     parentName: b.parent_name,
     school: b.camp.school,
     address: [b.camp.address, b.camp.area, b.camp.postcode].filter(Boolean).join(", ") || null,
@@ -140,7 +140,7 @@ export async function recordPayment(p: PaymentRecord): Promise<void> {
       subject: `Payment received for ${booking.ref}`,
       react: InstalmentReceiptEmail({
         parentName: booking.parent_name,
-        ref: booking.ref,
+        reference: booking.ref,
         amount: gbp(p.amountPence),
         seq: inst.seq,
         count: booking.instalment_count,
@@ -207,7 +207,7 @@ export async function recordInstalmentFailure(instalmentId: string, reason: stri
     subject: `Action needed: payment for ${booking.ref}`,
     react: PaymentFailedEmail({
       parentName: booking.parent_name,
-      ref: booking.ref,
+      reference: booking.ref,
       amount: gbp(inst.amount_pence),
       reason,
       retry: giveUp
@@ -246,6 +246,6 @@ export async function sendCancellationEmail(booking: BookingSummary, refundPence
   await sendEmail({
     to: booking.parent_email,
     subject: `Booking ${booking.ref} cancelled`,
-    react: BookingCancelledEmail({ parentName: booking.parent_name, ref: booking.ref, school: booking.camp.school, refund: refundPence > 0 ? gbp(refundPence) : null }),
+    react: BookingCancelledEmail({ parentName: booking.parent_name, reference: booking.ref, school: booking.camp.school, refund: refundPence > 0 ? gbp(refundPence) : null }),
   });
 }

@@ -36,7 +36,7 @@ const row = { fontSize: 14, margin: "0 0 4px" } as const;
 const cta = { background: gold, color: "#0b0b0b", borderRadius: 999, padding: "12px 22px", fontWeight: 800, textDecoration: "none" } as const;
 
 export type BookingEmailData = {
-  ref: string;
+  reference: string;
   parentName: string;
   school: string;
   address: string | null;
@@ -51,8 +51,8 @@ export type BookingEmailData = {
 
 export function BookingConfirmedEmail(d: BookingEmailData) {
   return (
-    <Layout preview={`You're booked in: ${d.school} (${d.ref})`} title="You're booked in!">
-      <Text style={p}>Hi {d.parentName.split(" ")[0]}, thanks for booking with Prime Sports UK. Your reference is <b>{d.ref}</b>.</Text>
+    <Layout preview={`You're booked in: ${d.school} (${d.reference})`} title="You're booked in!">
+      <Text style={p}>Hi {d.parentName.split(" ")[0]}, thanks for booking with Prime Sports UK. Your reference is <b>{d.reference}</b>.</Text>
       <Text style={row}><b>{d.school}</b>{d.address ? `, ${d.address}` : ""}</Text>
       <Text style={row}>{d.times}</Text>
       <Text style={row}>{d.days.join(" · ")}</Text>
@@ -72,20 +72,20 @@ export function BookingConfirmedEmail(d: BookingEmailData) {
   );
 }
 
-export function InstalmentReceiptEmail(d: { parentName: string; ref: string; amount: string; seq: number; count: number; remaining: string }) {
+export function InstalmentReceiptEmail(d: { parentName: string; reference: string; amount: string; seq: number; count: number; remaining: string }) {
   return (
-    <Layout preview={`Payment received for ${d.ref}`} title="Payment received">
-      <Text style={p}>Hi {d.parentName.split(" ")[0]}, we&apos;ve taken instalment {d.seq} of {d.count} ({d.amount}) for booking <b>{d.ref}</b>.</Text>
+    <Layout preview={`Payment received for ${d.reference}`} title="Payment received">
+      <Text style={p}>Hi {d.parentName.split(" ")[0]}, we&apos;ve taken instalment {d.seq} of {d.count} ({d.amount}) for booking <b>{d.reference}</b>.</Text>
       <Text style={p}>{d.remaining}</Text>
       <Button href={`${SITE}/account`} style={cta}>View receipts</Button>
     </Layout>
   );
 }
 
-export function PaymentFailedEmail(d: { parentName: string; ref: string; amount: string; reason: string; retry: string }) {
+export function PaymentFailedEmail(d: { parentName: string; reference: string; amount: string; reason: string; retry: string }) {
   return (
-    <Layout preview={`We couldn't take a payment for ${d.ref}`} title="We couldn't take your payment">
-      <Text style={p}>Hi {d.parentName.split(" ")[0]}, a scheduled payment of {d.amount} for booking <b>{d.ref}</b> didn&apos;t go through ({d.reason}).</Text>
+    <Layout preview={`We couldn't take a payment for ${d.reference}`} title="We couldn't take your payment">
+      <Text style={p}>Hi {d.parentName.split(" ")[0]}, a scheduled payment of {d.amount} for booking <b>{d.reference}</b> didn&apos;t go through ({d.reason}).</Text>
       <Text style={p}>{d.retry}</Text>
       <Text style={p}>You can pay now, or use a different card, from your account.</Text>
       <Button href={`${SITE}/account`} style={cta}>Pay now</Button>
@@ -106,10 +106,10 @@ export function CampReminderEmail(d: { parentName: string; school: string; addre
   );
 }
 
-export function BookingCancelledEmail(d: { parentName: string; ref: string; school: string; refund: string | null }) {
+export function BookingCancelledEmail(d: { parentName: string; reference: string; school: string; refund: string | null }) {
   return (
-    <Layout preview={`Booking ${d.ref} cancelled`} title="Booking cancelled">
-      <Text style={p}>Hi {d.parentName.split(" ")[0]}, your booking <b>{d.ref}</b> at {d.school} has been cancelled.</Text>
+    <Layout preview={`Booking ${d.reference} cancelled`} title="Booking cancelled">
+      <Text style={p}>Hi {d.parentName.split(" ")[0]}, your booking <b>{d.reference}</b> at {d.school} has been cancelled.</Text>
       <Text style={p}>{d.refund ? `A refund of ${d.refund} is on its way to your card. It can take 5 to 10 working days to appear.` : "No refund is due on this booking under our booking terms."}</Text>
       <Text style={p}>Questions? Reply to this email or contact admin@primesportsuk.org.</Text>
     </Layout>

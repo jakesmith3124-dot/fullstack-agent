@@ -4,6 +4,7 @@ import { audit, requireStaff } from "@/lib/auth";
 import { ageOn, longDate, timeRange } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getAgeGroups } from "@/lib/data";
+import { AutoRefresh } from "@/app/(site)/book/confirmed/[ref]/AutoRefresh";
 import { RegisterClient, type RegisterRow } from "./RegisterClient";
 
 export default async function RegisterPage({ params }: PageProps<"/admin/register/[dayId]">) {
@@ -49,6 +50,8 @@ export default async function RegisterPage({ params }: PageProps<"/admin/registe
       <p><Link href="/admin/register">← Registers</Link></p>
       <h1 className="admin-title">{camp.school}</h1>
       <p className="muted">{longDate(day.date)} · {timeRange(camp.start_time, camp.end_time)} · {rows.length} children · {rows.filter((r) => r.medical).length} with medical needs · {rows.filter((r) => !r.photo).length} no photos</p>
+      <p className="hint">This register refreshes every 30 seconds. For running-late alerts on this phone, open the <Link href="/app">Prime Camps app</Link> and tap the bell.</p>
+      <AutoRefresh every={30000} max={480} />
       <RegisterClient dayId={dayId} rows={rows} groups={[...new Set(rows.map((r) => r.group).filter(Boolean))] as string[]} />
     </>
   );

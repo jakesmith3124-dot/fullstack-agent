@@ -49,3 +49,24 @@ export async function notifyParent(userId: string, kind: NotificationKind, paylo
     console.error("notifyParent", e);
   }
 }
+
+/** Push to the staff assigned to a camp day (and the owner), for running-late alerts. */
+export async function notifyStaffForDay(dayId: string, payload: Payload) {
+  try {
+    const db = createAdminClient();
+    const { data: day } = await db.from("camp_days").select("camp_id").eq("id", dayId).single();
+    if (!day) return;
+    const { data: staff } = await db.from("staff_assignments").select("staff_id, camp_day_id").eq("camp_id", day.camp_id);
+    const { data: owners } = await db.from("profiles").select("id").eq("role", "owner");
+    const ids = new Set([...(staff ?? []).filter((s) => !s.camp_day_id || s.camp_day_id === dayId).map((s) => s.staff_id), ...(owners ?? []).map((o) => o.id)]);
+    if (!ready()) return;
+    const { data: subs } = await db.from("push_subscriptions").select("id, endpoint, p256dh, auth").in("user_id", [...ids]);
+    for (const s of subs ?? []) {
+      await webpush
+        .sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify({ ...payload, tag: payload.tag || "late" }), { TTL: 1800 })
+        .catch(async (e: { statusCode?: number }) => { if (e.statusCode === 404 || e.statusCode === 410) await db.from("push_subscriptions").delete().eq("id", s.id); });
+    }
+  } catch (e) {
+    console.error("notifyStaffForDay", e);
+  }
+}

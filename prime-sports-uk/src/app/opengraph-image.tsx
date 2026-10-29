@@ -12,7 +12,6 @@ export default async function OgImage() {
   return new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", background: "#0b0b0b", display: "flex", alignItems: "center", padding: 80, gap: 60 }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={src} width={231} height={300} alt="" />
         <div style={{ display: "flex", flexDirection: "column", color: "#fff" }}>
           <div style={{ color: "#d4a72c", fontSize: 30, letterSpacing: 6, textTransform: "uppercase" }}>Prime Sports UK</div>
