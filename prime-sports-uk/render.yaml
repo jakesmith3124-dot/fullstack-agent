@@ -1,0 +1,77 @@
+# Render Blueprint: in Render choose New → Blueprint and pick this repository.
+# Render asks for each "sync: false" value when the Blueprint is first created.
+services:
+  - type: web
+    name: prime-sports-uk
+    runtime: node
+    region: frankfurt # Render has no London region; the database stays in London on Supabase
+    plan: starter
+    rootDir: prime-sports-uk
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start -- -p $PORT
+    healthCheckPath: /robots.txt
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: "Prime Sports UK <bookings@primesportsuk.org>"
+      - key: NEXT_PUBLIC_TURNSTILE_SITE_KEY
+        sync: false
+      - key: TURNSTILE_SECRET_KEY
+        sync: false
+      - key: NEXT_PUBLIC_VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        value: mailto:admin@primesportsuk.org
+      - key: CRON_SECRET
+        generateValue: true
+      - key: RATE_LIMIT_SALT
+        generateValue: true
+
+  # Scheduled jobs (times in UTC). They call the website with the shared CRON_SECRET.
+  - type: cron
+    name: prime-sports-daily
+    runtime: node
+    region: frankfurt
+    plan: starter
+    rootDir: prime-sports-uk
+    schedule: "5 7 * * *"
+    buildCommand: "true"
+    startCommand: 'curl -fsS -H "Authorization: Bearer $CRON_SECRET" "$NEXT_PUBLIC_SITE_URL/api/cron/daily"'
+    envVars:
+      - key: CRON_SECRET
+        fromService: { type: web, name: prime-sports-uk, envVarKey: CRON_SECRET }
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+  - type: cron
+    name: prime-sports-reminders
+    runtime: node
+    region: frankfurt
+    plan: starter
+    rootDir: prime-sports-uk
+    schedule: "5 16 * * *"
+    buildCommand: "true"
+    startCommand: 'curl -fsS -H "Authorization: Bearer $CRON_SECRET" "$NEXT_PUBLIC_SITE_URL/api/cron/reminders"'
+    envVars:
+      - key: CRON_SECRET
+        fromService: { type: web, name: prime-sports-uk, envVarKey: CRON_SECRET }
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false

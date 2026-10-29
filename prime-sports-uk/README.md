@@ -99,6 +99,10 @@ With `STRIPE_SECRET_KEY` and the publishable key set to **test mode** keys, the 
 3. `vercel.json` pins the functions to London (`lhr1`) and schedules two jobs: 07:05 UTC (expire holds, take due instalments, flag unpaid bookings, data retention) and 16:05 UTC (day-before reminders).
 4. Analytics: enable Vercel Web Analytics (no cookies, so no cookie banner is needed).
 
+### 4b. Or host on Render instead of Vercel
+
+`render.yaml` is a Render Blueprint: in Render choose **New → Blueprint**, pick this repository and fill in the values it asks for (the same ones as `.env.example`). It creates the website and the two scheduled jobs. Set `NEXT_PUBLIC_SITE_URL` to the Render address (for example `https://prime-sports-uk.onrender.com`) until the domain moves, and add that address to Supabase's redirect URLs. Render has no London region, so the site runs in Frankfurt while the data stays in London on Supabase. Use a paid instance (Starter or above) so the site doesn't go to sleep.
+
 ### 5. Domain switch from Wix
 
 1. In Vercel, add `primesportsuk.org` and `www.primesportsuk.org`.

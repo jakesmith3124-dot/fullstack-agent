@@ -32,7 +32,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en-GB" className={`${display.variable} ${body.variable}`}>
       <body>
         {children}
-        <Analytics />
+        {/* Vercel's cookie-free analytics only works when hosted on Vercel. */}
+        {process.env.VERCEL && <Analytics />}
       </body>
     </html>
   );
