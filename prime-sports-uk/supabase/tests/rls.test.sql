@@ -106,6 +106,13 @@ exception when raise_exception then
   raise notice 'ok - parent cannot change their own role';
 end $$;
 do $$ begin
+  update public.profiles set email = 'parent2@example.com' where id = '00000000-0000-0000-0000-0000000000c1';
+  raise exception 'FAILED: parent changed their profile email';
+exception when raise_exception then
+  if sqlerrm like 'FAILED%' then raise; end if;
+  raise notice 'ok - parent cannot change the email used to match bookings';
+end $$;
+do $$ begin
   insert into public.children (parent_id, first_name, last_name, dob) values ('00000000-0000-0000-0000-0000000000c2', 'X', 'Y', '2018-01-01');
   raise exception 'FAILED: parent added a child to another family';
 exception when insufficient_privilege then raise notice 'ok - parent cannot add a child to another family';
