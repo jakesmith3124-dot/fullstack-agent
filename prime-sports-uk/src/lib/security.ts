@@ -12,6 +12,8 @@ export async function clientKey(): Promise<string> {
 
 /** True when the caller is under the limit. Backed by Postgres so it works across serverless instances. */
 export async function rateLimit(bucket: string, max: number, windowSeconds: number): Promise<boolean> {
+  // Local test runs can switch the limiter off; production always enforces it.
+  if (process.env.RATE_LIMIT_DISABLED === "1" && process.env.VERCEL_ENV !== "production") return true;
   const key = `${bucket}:${await clientKey()}`;
   const { data, error } = await createAdminClient().rpc("hit_rate_limit", {
     p_key: key,

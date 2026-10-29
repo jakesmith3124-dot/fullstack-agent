@@ -38,6 +38,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // The dev-only Next.js badge sits on top of the parent app's bottom tab bar.
+  devIndicators: false,
   // Tailwind CSS v4 runs through its Turbopack loader.
   turbopack: {
     rules: {

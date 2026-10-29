@@ -4,6 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
 // (or Stripe test mode when STRIPE_SECRET_KEY is set). See README → Testing.
 export default defineConfig({
   testDir: "tests/e2e",
+  globalSetup: "./tests/e2e/global-setup.ts",
   timeout: 90_000,
   fullyParallel: false,
   workers: 1,

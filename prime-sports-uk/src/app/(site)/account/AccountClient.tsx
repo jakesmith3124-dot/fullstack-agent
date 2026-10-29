@@ -2,7 +2,7 @@
 import { useFormAction } from "@/lib/use-form-action";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { deleteMyData, membershipAction, payInstalment, saveDetails } from "@/app/actions/account";
 import { STRIPE_PUBLISHABLE_KEY } from "@/lib/env";

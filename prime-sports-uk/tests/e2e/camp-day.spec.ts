@@ -12,7 +12,6 @@ test.describe.serial("owner, staff and parent app on a camp day", () => {
   const todayLong = new Date().toLocaleDateString("en-GB", { timeZone: "Europe/London", day: "numeric", month: "long", year: "numeric" });
   let ownerSecret = "";
   let staffSecret = "";
-  let campPath = "";
   let passCode = "";
 
   test.beforeAll(async () => {
@@ -39,7 +38,6 @@ test.describe.serial("owner, staff and parent app on a camp day", () => {
     await page.getByLabel(/Venue, dates and prices are confirmed/).check();
     await page.getByRole("button", { name: "Create camp" }).click();
     await expect(page.getByText("Camp created")).toBeVisible();
-    campPath = new URL(page.url()).pathname;
 
     const days = page.locator(".card").filter({ has: page.getByRole("heading", { name: "Days and places" }) });
     await days.getByLabel("From").fill(new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" }));
@@ -70,8 +68,6 @@ test.describe.serial("owner, staff and parent app on a camp day", () => {
 
   test("a parent books two children for today", async ({ page }) => {
     await fresh(page);
-    const slug = await page.request.get("/camps").then(() => null);
-    void slug;
     const db = adminDb();
     const { data } = await db.from("camps").select("slug").eq("school", school).single();
     await page.goto(`/book/${data!.slug}`);

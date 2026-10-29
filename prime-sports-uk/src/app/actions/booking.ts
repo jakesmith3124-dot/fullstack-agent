@@ -29,7 +29,8 @@ export type StartResult =
  * Prices are always recalculated here from the database; nothing the browser sends is trusted.
  */
 export async function startBooking(raw: BookingInput): Promise<StartResult> {
-  if (!(await rateLimit("booking", 15, 600))) return { ok: false, error: "Too many attempts. Please wait a few minutes and try again." };
+  // Generous: parents on mobile networks can share one IP address on booking-opening day.
+  if (!(await rateLimit("booking", 60, 600))) return { ok: false, error: "Too many attempts. Please wait a few minutes and try again." };
   const parsed = bookingSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstError(parsed.error) };
   const input = parsed.data;

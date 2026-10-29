@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { CAMP, fillChild, fillParent, payAndExpectConfirmed, pickDays, uniqueEmail } from "./helpers";
+import { CAMP, fillChild, fillParent, payAndExpectConfirmed, uniqueEmail } from "./helpers";
 import { adminDb, env } from "./support";
 
 test("Prime Camps early access sign-up is saved with consent", async ({ page }) => {
