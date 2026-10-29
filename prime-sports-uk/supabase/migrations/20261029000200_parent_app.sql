@@ -135,6 +135,11 @@ values
   ('originals', 'originals', false, 15728640, null)
 on conflict (id) do nothing;
 
+drop policy if exists "site public read" on storage.objects;
+drop policy if exists "site owner write" on storage.objects;
+drop policy if exists "site owner update" on storage.objects;
+drop policy if exists "site owner delete" on storage.objects;
+drop policy if exists "originals owner" on storage.objects;
 create policy "site public read" on storage.objects for select using (bucket_id = 'site');
 create policy "site owner write" on storage.objects for insert with check (bucket_id = 'site' and public.is_owner());
 create policy "site owner update" on storage.objects for update using (bucket_id = 'site' and public.is_owner());
