@@ -13,18 +13,27 @@ const DEFAULT_FLAGS: Flags = { bookings_open: true, prime_camps_bookings: false,
 
 type SettingRow = { key: string; value: unknown; confirmed: boolean };
 
-export const getSettings = unstable_cache(
+// Loaders throw on failure so an outage is never cached as "no data"; callers fall back.
+const loadSettings = unstable_cache(
   async (): Promise<Record<string, SettingRow>> => {
     const { data, error } = await createPublicClient().from("settings").select("key, value, confirmed");
-    if (error) {
-      console.error("settings", error.message);
-      return {};
-    }
+    if (error) throw new Error(`settings: ${error.message}`);
     return Object.fromEntries((data ?? []).map((r) => [r.key, r as SettingRow]));
   },
   ["settings"],
   { tags: [PUBLIC_TAG, "settings"], revalidate: REVALIDATE },
 );
+
+async function safe<T>(load: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await load();
+  } catch (e) {
+    console.error((e as Error).message);
+    return fallback;
+  }
+}
+
+export const getSettings = () => safe(loadSettings, {} as Record<string, SettingRow>);
 
 export async function getFlags(): Promise<Flags> {
   const s = await getSettings();
@@ -47,22 +56,21 @@ export async function getAgeGroups(): Promise<{ groups: AgeGroup[]; confirmed: b
   return { groups: (s.age_groups?.value as AgeGroup[]) ?? [], confirmed: !!s.age_groups?.confirmed };
 }
 
-export const getAllContent = unstable_cache(
+const loadContent = unstable_cache(
   async (): Promise<ContentItem[]> => {
     // RLS returns only confirmed, visible items to the public client.
     const { data, error } = await createPublicClient()
       .from("content_items")
       .select("id, key, section, kind, data, confirmed, tbc_note, is_visible, sort_order")
       .order("sort_order");
-    if (error) {
-      console.error("content", error.message);
-      return [];
-    }
+    if (error) throw new Error(`content: ${error.message}`);
     return (data ?? []) as ContentItem[];
   },
   ["content"],
   { tags: [PUBLIC_TAG, "content"], revalidate: REVALIDATE },
 );
+
+export const getAllContent = () => safe(loadContent, [] as ContentItem[]);
 
 /** Confirmed content, keyed for easy lookup. Missing keys mean "hidden". */
 export async function getContent() {
@@ -81,18 +89,16 @@ export async function getContent() {
 const CAMP_COLUMNS =
   "id, slug, brand, school, area, address, postcode, description, age_min, age_max, start_time, end_time, price_per_day_pence, full_week_price_pence, booking_opens_at, booking_closes_at, photo_path, photo_alt, logo_path, logo_original_path, what_to_bring, timetable, sort_order, is_visible, confirmed, is_demo";
 
-const loadCamps = unstable_cache(
+const cachedCamps = unstable_cache(
   async (): Promise<Camp[]> => {
     const { data, error } = await createPublicClient().from("camps").select(CAMP_COLUMNS).order("sort_order").order("school");
-    if (error) {
-      console.error("camps", error.message);
-      return [];
-    }
+    if (error) throw new Error(`camps: ${error.message}`);
     return (data ?? []) as Camp[];
   },
   ["camps"],
   { tags: [PUBLIC_TAG, "camps"], revalidate: REVALIDATE },
 );
+const loadCamps = () => safe(cachedCamps, [] as Camp[]);
 
 /** Availability is not cached: spaces change with every booking. */
 export async function getCampDays(campId: string): Promise<CampDay[]> {
