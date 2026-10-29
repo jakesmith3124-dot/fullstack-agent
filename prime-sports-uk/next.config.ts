@@ -9,9 +9,10 @@ const supabaseHost = (() => {
 })();
 
 // Content Security Policy. Next.js needs inline scripts for hydration; everything else is locked down.
+const dev = process.env.NODE_ENV !== "production";
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://js.stripe.com https://challenges.cloudflare.com https://va.vercel-scripts.com",
+  `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ""} https://js.stripe.com https://challenges.cloudflare.com https://va.vercel-scripts.com`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${supabaseHost.origin} https://*.stripe.com`,
   "font-src 'self'",
@@ -23,7 +24,7 @@ const csp = [
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "object-src 'none'",
-  "upgrade-insecure-requests",
+  ...(dev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
 const securityHeaders = [
@@ -37,6 +38,12 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Tailwind CSS v4 runs through its Turbopack loader.
+  turbopack: {
+    rules: {
+      "*.css": { loaders: ["@tailwindcss/turbopack"], as: "*.css" },
+    },
+  },
   images: {
     remotePatterns: [
       {

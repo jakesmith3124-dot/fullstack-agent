@@ -390,7 +390,7 @@ section { padding-block: 4.5rem; }
 .progress span.on { background: var(--accent); }
 .stepname { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .camp-pick { display: flex; gap: 1rem; align-items: center; }
-.camp-pick .school-logo { position: static; width: 64px; height: 64px; border-width: 3px; flex: none; font-size: 1.1rem; }
+.camp-pick .school-logo { position: relative; right: auto; bottom: auto; width: 64px; height: 64px; border-width: 3px; flex: none; font-size: 1.1rem; }
 .days { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 0.6rem; }
 .day { border: 1.5px solid var(--line); border-radius: 16px; padding: 0.75rem 0.5rem; background: var(--surface); color: var(--ink); display: grid; justify-items: center; gap: 0.1rem; transition: border-color 0.12s, background 0.12s; cursor: pointer; font: inherit; }
 .day .dw { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
@@ -417,7 +417,7 @@ section { padding-block: 4.5rem; }
 .sched div { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
 .pay-box { border: 1.5px solid var(--line); border-radius: 16px; padding: 1rem; display: grid; gap: 0.6rem; }
 .basket { position: sticky; top: 90px; }
-@media (max-width: 880px) { .basket { position: static; order: -1; } }
+@media (max-width: 880px) { .basket { position: static; } }
 .line { display: flex; justify-content: space-between; gap: 1rem; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
 .line.disc { color: var(--ok); font-weight: 700; }
 .line.total { font-weight: 800; font-size: 1.25rem; border-top: 1px dashed var(--line); padding-top: 0.8rem; }
@@ -429,3 +429,4 @@ section { padding-block: 4.5rem; }
 .cardrow { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 .cardrow span { font-size: 0.72rem; font-weight: 800; border: 1px solid var(--line); border-radius: 6px; padding: 0.2rem 0.45rem; color: var(--muted); }
 .saved-kids { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.camp p, .card p, .form-card p { margin-inline: 0; }

@@ -6,7 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "node --import tsx --test tests/unit/*.test.ts",
+    "test:db": "bash scripts/test-db.sh",
+    "test:e2e": "playwright test",
+    "db:start": "supabase start -x studio,postgres-meta,edge-runtime,logflare,vector,imgproxy,supavisor",
+    "db:reset": "supabase db reset",
+    "seed:assets": "node --env-file=.env.local --conditions=react-server --import tsx scripts/seed-assets.mts",
+    "seed:owner": "node --env-file=.env.local --import tsx scripts/create-owner.mts"
   },
   "dependencies": {
     "@react-email/components": "^1.0.12",
@@ -43,5 +51,8 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.9"
   }
 }
