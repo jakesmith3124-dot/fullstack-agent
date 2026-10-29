@@ -1,17 +1,18 @@
 "use client";
-import { useActionState, useState, useTransition } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+import { useState, useTransition } from "react";
 import { deleteChild, saveChild } from "@/app/actions/account";
 
 type Child = { id: string; first_name: string; last_name: string; dob: string; school: string | null; medical: string | null; allergies: string | null; send: string | null; photo_consent: boolean; collectors: string[] } | null;
 type Result = { ok: boolean; error?: string; message?: string };
 
 export function ChildForm({ child }: { child: Child }) {
-  const [state, action, pending] = useActionState<Result, FormData>(saveChild.bind(null, child?.id ?? null), { ok: false });
+  const [state, action, pending] = useFormAction<Result>(saveChild.bind(null, child?.id ?? null), { ok: false });
   const [photo, setPhoto] = useState(child ? (child.photo_consent ? "yes" : "no") : "");
   const [removing, startRemove] = useTransition();
   const [removeError, setRemoveError] = useState("");
   return (
-    <form className="card" action={action}>
+    <form className="card" onSubmit={action}>
       <div className="grid2">
         <label className="field">First name<input name="first_name" defaultValue={child?.first_name} required /></label>
         <label className="field">Surname<input name="last_name" defaultValue={child?.last_name} required /></label>

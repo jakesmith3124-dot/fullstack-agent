@@ -1,5 +1,6 @@
 "use client";
-import { useActionState, useState, useTransition } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+import { useState, useTransition } from "react";
 import { addCampDays, deleteCamp, removeDay, saveCamp, updateDayCapacity } from "@/app/actions/admin-camps";
 import { longDate } from "@/lib/format";
 import type { Camp } from "@/lib/types";
@@ -7,10 +8,10 @@ import type { Camp } from "@/lib/types";
 type Result = { ok: boolean; error?: string; message?: string };
 
 export function CampForm({ camp }: { camp: Camp | null }) {
-  const [state, action, pending] = useActionState<Result, FormData>(saveCamp.bind(null, camp?.id ?? null), { ok: false });
+  const [state, action, pending] = useFormAction<Result>(saveCamp.bind(null, camp?.id ?? null), { ok: false });
   const c = camp;
   return (
-    <form action={action} className={`card${c && !c.confirmed ? " unconfirmed" : ""}`} style={{ alignSelf: "start" }}>
+    <form onSubmit={action} className={`card${c && !c.confirmed ? " unconfirmed" : ""}`} style={{ alignSelf: "start" }}>
       <h2>Camp details</h2>
       <label className="field">School or venue name<input name="school" defaultValue={c?.school} required /></label>
       <div className="grid2">
@@ -51,7 +52,7 @@ export function CampForm({ camp }: { camp: Camp | null }) {
 }
 
 export function DaysEditor({ campId, days }: { campId: string; days: { id: string; date: string; capacity: number; taken: number }[] }) {
-  const [state, action, pending] = useActionState<Result, FormData>(addCampDays.bind(null, campId), { ok: false });
+  const [state, action, pending] = useFormAction<Result>(addCampDays.bind(null, campId), { ok: false });
   const [msg, setMsg] = useState<Result | null>(null);
   const [busy, start] = useTransition();
   return (
@@ -79,7 +80,7 @@ export function DaysEditor({ campId, days }: { campId: string; days: { id: strin
       ) : <p className="muted">No days yet.</p>}
       {msg?.error && <p className="err">{msg.error}</p>}
       {msg?.message && <p className="okmsg">{msg.message}</p>}
-      <form action={action} style={{ display: "grid", gap: ".6rem" }}>
+      <form onSubmit={action} style={{ display: "grid", gap: ".6rem" }}>
         <h3>Add days</h3>
         <div className="grid2">
           <label className="field">From<input name="from" type="date" required /></label>

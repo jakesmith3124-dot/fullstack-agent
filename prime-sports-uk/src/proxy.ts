@@ -4,7 +4,10 @@ import { NextResponse, type NextRequest } from "next/server";
 // Refreshes the Supabase session cookie on each request and keeps signed-out visitors
 // away from account, admin and app pages. Role and 2FA checks happen again on the server.
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  // Pass the requested path on, so server layouts can send people back to it after 2FA.
+  const headers = new Headers(request.headers);
+  headers.set("x-path", request.nextUrl.pathname + request.nextUrl.search);
+  let response = NextResponse.next({ request: { headers } });
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return response;
@@ -16,7 +19,8 @@ export async function proxy(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
+        headers.set("cookie", request.cookies.toString());
+        response = NextResponse.next({ request: { headers } });
         cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
       },
     },

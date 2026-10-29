@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
 import { AdminNav } from "./AdminNav";
@@ -5,7 +6,8 @@ import { AdminNav } from "./AdminNav";
 export const dynamic = "force-dynamic";
 
 export default async function SecureAdminLayout({ children }: LayoutProps<"/admin">) {
-  const viewer = await requireStaff("/admin");
+  const path = (await headers()).get("x-path") || "/admin";
+  const viewer = await requireStaff(path.startsWith("/admin") ? path : "/admin");
   return (
     <>
       <header className="admin-bar">

@@ -1,5 +1,6 @@
 "use client";
-import { useActionState, useMemo, useState, useTransition } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+import { useMemo, useState, useTransition } from "react";
 import { acknowledgeLate, createPost, resolvePass, signInChild, signOutChild, undoSignIn } from "@/app/actions/register";
 import { fmtClock } from "@/lib/format";
 import { QrScanner } from "@/components/admin/QrScanner";
@@ -137,10 +138,10 @@ function ManualCode({ onCode }: { onCode: (c: string) => void }) {
 }
 
 function PostForm({ dayId, rows, groups }: { dayId: string; rows: RegisterRow[]; groups: string[] }) {
-  const [state, action, pending] = useActionState<Result, FormData>(createPost.bind(null, dayId), { ok: false });
+  const [state, action, pending] = useFormAction<Result>(createPost.bind(null, dayId), { ok: false }, (r) => r.ok);
   const [hasPhotos, setHasPhotos] = useState(false);
   return (
-    <form id="post" className="card" action={action}>
+    <form id="post" className="card" onSubmit={action}>
       <h2>Post an update to parents</h2>
       <label className="field">Title<input name="title" placeholder="Archery is underway" /></label>
       <label className="field">Message<textarea name="body" placeholder="First arrows of the week…" /></label>

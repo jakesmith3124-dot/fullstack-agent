@@ -1,5 +1,6 @@
 "use client";
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+
 import { submitLead, type LeadKind, type LeadState } from "@/app/actions/leads";
 import { AREAS, SCHOOL_INTERESTS } from "@/lib/validation";
 import { Turnstile } from "./Turnstile";
@@ -19,7 +20,7 @@ const SUBMIT: Record<LeadKind, [string, string]> = {
 };
 
 export function LeadForm({ kind }: { kind: LeadKind }) {
-  const [state, action, pending] = useActionState<LeadState, FormData>(submitLead.bind(null, kind), { ok: false });
+  const [state, action, pending] = useFormAction<LeadState>(submitLead.bind(null, kind), { ok: false });
   const id = (f: string) => `${kind}-${f}`;
 
   if (state.ok) {
@@ -35,7 +36,7 @@ export function LeadForm({ kind }: { kind: LeadKind }) {
   }
 
   return (
-    <form className="form-card" action={action} noValidate>
+    <form className="form-card" onSubmit={action} noValidate>
       <div style={{ position: "absolute", left: "-9999px" }} aria-hidden="true">
         <label>Leave this empty<input name="company_website" tabIndex={-1} autoComplete="off" /></label>
       </div>

@@ -1,13 +1,14 @@
 "use client";
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+
 import { cancelBooking, issueRefund } from "@/app/actions/admin-bookings";
 
 type Result = { ok: boolean; error?: string; message?: string };
 
 export function RefundForm({ bookingId, max }: { bookingId: string; max: number }) {
-  const [state, action, pending] = useActionState<Result, FormData>(issueRefund.bind(null, bookingId), { ok: false });
+  const [state, action, pending] = useFormAction<Result>(issueRefund.bind(null, bookingId), { ok: false });
   return (
-    <form className="card" action={action} onSubmit={(e) => { if (!confirm("Issue this refund through Stripe?")) e.preventDefault(); }}>
+    <form className="card" onSubmit={(e) => { if (!confirm("Issue this refund through Stripe?")) return e.preventDefault(); action(e); }}>
       <h2>Refund</h2>
       <div className="grid2">
         <label className="field">Amount (£)<input name="amount" type="number" step="0.01" min="0.01" max={max} defaultValue={max.toFixed(2)} /></label>
@@ -22,9 +23,9 @@ export function RefundForm({ bookingId, max }: { bookingId: string; max: number 
 }
 
 export function CancelForm({ bookingId, paid }: { bookingId: string; paid: number }) {
-  const [state, action, pending] = useActionState<Result, FormData>(cancelBooking.bind(null, bookingId), { ok: false });
+  const [state, action, pending] = useFormAction<Result>(cancelBooking.bind(null, bookingId), { ok: false });
   return (
-    <form className="card" action={action} onSubmit={(e) => { if (!confirm("Cancel this booking? Its places will be released.")) e.preventDefault(); }}>
+    <form className="card" onSubmit={(e) => { if (!confirm("Cancel this booking? Its places will be released.")) return e.preventDefault(); action(e); }}>
       <h2>Cancel booking</h2>
       <div className="grid2">
         <label className="field">Refund (£)<input name="refund" type="number" step="0.01" min="0" max={paid} defaultValue={paid.toFixed(2)} /></label>

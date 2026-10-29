@@ -1,18 +1,19 @@
 "use client";
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+
 import { saveSettings } from "@/app/actions/admin-content";
 
 type Result = { ok: boolean; error?: string; message?: string };
 type S = Record<string, { value: unknown; confirmed: boolean }>;
 
 export function SettingsForm({ s }: { s: S }) {
-  const [state, action, pending] = useActionState<Result, FormData>(saveSettings, { ok: false });
+  const [state, action, pending] = useFormAction<Result>(saveSettings, { ok: false });
   const inst = (s.instalments?.value ?? {}) as Record<string, number | boolean>;
   const flags = (s.flags?.value ?? {}) as Record<string, boolean>;
   const groups = (s.age_groups?.value ?? []) as { name: string; min: number; max: number }[];
   const box = (confirmed: boolean | undefined) => `card${confirmed === false ? " unconfirmed" : ""}`;
   return (
-    <form action={action} style={{ display: "grid", gap: "1rem" }}>
+    <form onSubmit={action} style={{ display: "grid", gap: "1rem" }}>
       <div className="card">
         <h2>Feature switches</h2>
         <label className="chk"><input type="checkbox" name="flag_bookings_open" defaultChecked={flags.bookings_open} /><span>Holiday camp bookings open</span></label>

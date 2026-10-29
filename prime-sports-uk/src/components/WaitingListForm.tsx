@@ -1,13 +1,14 @@
 "use client";
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+
 import { joinWaitingList } from "@/app/actions/waiting";
 import { Turnstile } from "./Turnstile";
 
 export function WaitingListForm({ days, defaultDay }: { days: { id: string; label: string }[]; defaultDay?: string }) {
-  const [state, action, pending] = useActionState(joinWaitingList, { ok: false } as { ok: boolean; error?: string });
+  const [state, action, pending] = useFormAction<{ ok: boolean; error?: string }>(joinWaitingList, { ok: false });
   if (state.ok) return <p className="okmsg" role="status">You&apos;re on the waiting list. We&apos;ll email you if a space opens up.</p>;
   return (
-    <form action={action} style={{ display: "grid", gap: ".8rem" }} noValidate>
+    <form onSubmit={action} style={{ display: "grid", gap: ".8rem" }} noValidate>
       <label className="field">Day
         <select name="day_id" defaultValue={defaultDay ?? days[0]?.id}>
           {days.map((d) => <option key={d.id} value={d.id}>{d.label}</option>)}

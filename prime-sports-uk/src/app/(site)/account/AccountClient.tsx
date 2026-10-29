@@ -1,6 +1,7 @@
 "use client";
+import { useFormAction } from "@/lib/use-form-action";
 import { useRouter } from "next/navigation";
-import { useActionState, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { deleteMyData, membershipAction, payInstalment, saveDetails } from "@/app/actions/account";
@@ -17,9 +18,9 @@ const PREFS: [string, string][] = [
 ];
 
 export function AccountForms({ profile }: { profile: { full_name: string; phone: string; emergency_name: string; emergency_phone: string; emergency_relationship: string; prefs: Record<string, boolean> } }) {
-  const [state, action, pending] = useActionState<Result, FormData>(saveDetails, { ok: false });
+  const [state, action, pending] = useFormAction<Result>(saveDetails, { ok: false });
   return (
-    <form className="card" action={action} id="details">
+    <form className="card" onSubmit={action} id="details">
       <h2 className="h3-size">Saved details</h2>
       <div className="grid2">
         <label className="field">Full name<input name="full_name" defaultValue={profile.full_name} autoComplete="name" /></label>
@@ -114,10 +115,10 @@ function PayForm({ amount, onDone }: { amount: string; onDone: () => void }) {
 
 export function DeleteData() {
   const [open, setOpen] = useState(false);
-  const [state, action, pending] = useActionState<Result, FormData>(deleteMyData, { ok: false });
+  const [state, action, pending] = useFormAction<Result>(deleteMyData, { ok: false });
   if (!open) return <button className="link" type="button" style={{ justifySelf: "start", color: "var(--bad)" }} onClick={() => setOpen(true)}>Delete my data</button>;
   return (
-    <form action={action} style={{ display: "grid", gap: ".6rem" }}>
+    <form onSubmit={action} style={{ display: "grid", gap: ".6rem" }}>
       <p>This permanently deletes your children&apos;s details and your contact details, and signs you out. It can&apos;t be undone.</p>
       <label className="field">Type DELETE to confirm<input name="confirm" autoComplete="off" /></label>
       <p className="err" role="alert">{state.error}</p>

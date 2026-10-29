@@ -1,14 +1,15 @@
 "use client";
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+
 import { saveDiscount } from "@/app/actions/admin-content";
 
 type Result = { ok: boolean; error?: string; message?: string };
 type Code = { id: string; code: string; label: string | null; kind: string; value: number; active: boolean; expires_at: string; usage_limit: number | null; times_used: number; camp_ids: string[] | null };
 
 export function DiscountForm({ code, camps }: { code: Code | null; camps: { id: string; school: string; area: string }[] }) {
-  const [state, action, pending] = useActionState<Result, FormData>(saveDiscount.bind(null, code?.id ?? null), { ok: false });
+  const [state, action, pending] = useFormAction<Result>(saveDiscount.bind(null, code?.id ?? null), { ok: false });
   return (
-    <form action={action} className="card" style={{ gap: ".7rem" }}>
+    <form onSubmit={action} className="card" style={{ gap: ".7rem" }}>
       <div className="row"><h3>{code ? code.code : "Add a code"}</h3>{code && <span className={`tag ${code.active ? "ok" : "ph"}`}>{code.active ? "Active" : "Inactive"} · used {code.times_used}{code.usage_limit ? ` of ${code.usage_limit}` : ""}</span>}</div>
       <div className="grid2">
         <label className="field">Code<input name="code" defaultValue={code?.code} placeholder="EARLYBIRD" /></label>

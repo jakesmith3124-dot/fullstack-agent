@@ -1,13 +1,14 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+import { useState } from "react";
 import { addAssignment, addStaff } from "@/app/actions/admin-staff";
 
 type Result = { ok: boolean; error?: string; message?: string };
 
 export function AddStaffForm() {
-  const [state, action, pending] = useActionState<Result, FormData>(addStaff, { ok: false });
+  const [state, action, pending] = useFormAction<Result>(addStaff, { ok: false }, (r) => r.ok);
   return (
-    <form action={action} className="card">
+    <form onSubmit={action} className="card">
       <h2>Add a staff member</h2>
       <div className="grid2">
         <label className="field">Name<input name="name" /></label>
@@ -22,11 +23,11 @@ export function AddStaffForm() {
 }
 
 export function AssignForm({ staffId, camps }: { staffId: string; camps: { id: string; label: string; days: { id: string; label: string }[] }[] }) {
-  const [state, action, pending] = useActionState<Result, FormData>(addAssignment.bind(null, staffId), { ok: false });
+  const [state, action, pending] = useFormAction<Result>(addAssignment.bind(null, staffId), { ok: false });
   const [campId, setCampId] = useState("");
   const days = camps.find((c) => c.id === campId)?.days ?? [];
   return (
-    <form action={action} className="toolbar">
+    <form onSubmit={action} className="toolbar">
       <label className="field">Camp<select name="camp_id" value={campId} onChange={(e) => setCampId(e.target.value)}><option value="">Choose…</option>{camps.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}</select></label>
       <label className="field">Day<select name="day_id" defaultValue=""><option value="">Every day of this camp</option>{days.map((d) => <option key={d.id} value={d.id}>{d.label}</option>)}</select></label>
       <button className="btn small" disabled={pending}>Assign</button>

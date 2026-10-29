@@ -1,5 +1,6 @@
 "use client";
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+
 import { saveContent } from "@/app/actions/admin-content";
 import type { ContentItem } from "@/lib/types";
 
@@ -12,10 +13,10 @@ const LABELS: Record<string, string> = {
 const HIDDEN = new Set(["path", "photo"]);
 
 export function ContentItemForm({ item, deletable, onDelete }: { item: ContentItem; deletable: boolean; onDelete?: () => Promise<void> }) {
-  const [state, action, pending] = useActionState<Result, FormData>(saveContent.bind(null, item.id), { ok: false });
+  const [state, action, pending] = useFormAction<Result>(saveContent.bind(null, item.id), { ok: false });
   const data = item.data as Record<string, unknown>;
   return (
-    <form action={action} className={`card${item.confirmed ? "" : " unconfirmed"}`} style={{ gap: ".7rem" }}>
+    <form onSubmit={action} className={`card${item.confirmed ? "" : " unconfirmed"}`} style={{ gap: ".7rem" }}>
       <div className="row">
         <span className="muted" style={{ fontSize: ".8rem" }}>{item.key}</span>
         {!item.confirmed && <span className="badge-tbc">To confirm{item.tbc_note ? `: ${item.tbc_note}` : ""}</span>}
