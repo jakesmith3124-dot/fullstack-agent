@@ -19,7 +19,7 @@ export function LoginForm({ next, initialError }: { next: string; initialError: 
       options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     });
     setBusy(false);
-    if (error) return setError(error.status === 429 ? "Too many requests. Please wait a minute and try again." : "We couldn't send the link just now. Please try again.");
+    if (error) return setError(error.status === 429 ? "Too many requests. Please wait a minute and try again." : `We couldn't send the link just now. Please try again. (${error.message})`);
     setSent(true);
   }
 
