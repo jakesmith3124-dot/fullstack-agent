@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { dateRange, fmtDate, gbp, initials, shortDay, timeRange } from "@/lib/format";
 import { spaceLevel, spacesLeft } from "@/lib/pricing";
+import { CampPoster } from "@/components/CampPoster";
 import { kindWords } from "@/lib/camp-kind";
 import { publicImageUrl } from "@/lib/storage";
 import type { CampKind } from "@/lib/types";
@@ -44,7 +45,7 @@ export function CampCard({ camp, index = 0 }: { camp: CampCardData; index?: numb
         {photo ? (
           <Image src={photo} alt={camp.photo_alt || `Children at ${camp.school}`} fill sizes="(max-width: 760px) 100vw, 760px" />
         ) : (
-          <span>Photo coming soon</span>
+          <CampPoster kind={camp.kind} slug={camp.slug} area={camp.area} dates={camp.days.map((d) => d.date)} ageMin={camp.age_min} ageMax={camp.age_max} />
         )}
         <SchoolLogo school={camp.school} logoPath={camp.logo_path} />
       </div>

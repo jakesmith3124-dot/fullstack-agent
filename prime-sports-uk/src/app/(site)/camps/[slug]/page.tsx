@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SchoolLogo } from "@/components/CampCard";
+import { CampPoster } from "@/components/CampPoster";
 import { DayPicker } from "@/components/DayPicker";
 import { JsonLd } from "@/components/JsonLd";
 import { WaitingListForm } from "@/components/WaitingListForm";
@@ -75,7 +76,7 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
         <div className="wrap camp-detail">
           <div className="camp" style={{ alignSelf: "start" }}>
             <div className="camp-img">
-              {photo ? <Image src={photo} alt={camp.photo_alt || `Children at ${camp.school}`} fill sizes="(max-width: 820px) 100vw, 560px" priority /> : <span>Photo coming soon</span>}
+              {photo ? <Image src={photo} alt={camp.photo_alt || `Children at ${camp.school}`} fill sizes="(max-width: 820px) 100vw, 560px" priority /> : <CampPoster kind={camp.kind} slug={camp.slug} area={camp.area} dates={upcoming.map((d) => d.date)} ageMin={camp.age_min} ageMax={camp.age_max} />}
               <SchoolLogo school={camp.school} logoPath={camp.logo_path} />
             </div>
             <div className="camp-body">
