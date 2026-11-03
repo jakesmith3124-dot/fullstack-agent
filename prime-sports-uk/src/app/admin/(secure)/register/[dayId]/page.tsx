@@ -11,7 +11,7 @@ export default async function RegisterPage({ params }: PageProps<"/admin/registe
   const { dayId } = await params;
   await requireStaff(`/admin/register/${dayId}`);
   const supabase = await createClient();
-  const { data: day } = await supabase.from("camp_days").select("id, date, camp_id, camps(school, start_time, end_time, brand)").eq("id", dayId).maybeSingle();
+  const { data: day } = await supabase.from("camp_days").select("id, date, camp_id, start_time, end_time, camps(school, start_time, end_time, brand)").eq("id", dayId).maybeSingle();
   if (!day) notFound();
   const { data: assigned } = await supabase.rpc("is_assigned_to_day", { p_day: dayId });
   if (!assigned) notFound();
@@ -49,7 +49,7 @@ export default async function RegisterPage({ params }: PageProps<"/admin/registe
     <>
       <p><Link href="/admin/register">← Registers</Link></p>
       <h1 className="admin-title">{camp.school}</h1>
-      <p className="muted">{longDate(day.date)} · {timeRange(camp.start_time, camp.end_time)} · {rows.length} children · {rows.filter((r) => r.medical).length} with medical needs · {rows.filter((r) => !r.photo).length} no photos</p>
+      <p className="muted">{longDate(day.date)} · {timeRange(day.start_time ?? camp.start_time, day.end_time ?? camp.end_time)} · {rows.length} children · {rows.filter((r) => r.medical).length} with medical needs · {rows.filter((r) => !r.photo).length} no photos</p>
       <p className="hint">This register refreshes every 30 seconds. For running-late alerts on this phone, open the <Link href="/app">Prime Camps app</Link> and tap the bell.</p>
       <AutoRefresh every={30000} max={480} />
       <RegisterClient dayId={dayId} rows={rows} groups={[...new Set(rows.map((r) => r.group).filter(Boolean))] as string[]} />

@@ -122,7 +122,7 @@ select c.id, d::date, 30 from public.camps c,
     when 'bowling-green-academy-october-2026' then array['2026-10-27', '2026-10-28', '2026-10-29']
     when 'thornton-primary-school-october-2026' then array['2026-10-26', '2026-10-27', '2026-10-28'] end) d
 where c.slug in ('bowling-green-academy-october-2026', 'thornton-primary-school-october-2026')
-on conflict (camp_id, date) do nothing;
+on conflict do nothing;
 
 -- ---------------------------------------------------------------------------
 -- Discount codes: EARLYBIRD seeded as an inactive example.

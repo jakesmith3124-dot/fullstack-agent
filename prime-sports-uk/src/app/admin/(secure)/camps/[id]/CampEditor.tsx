@@ -2,7 +2,7 @@
 import { useFormAction } from "@/lib/use-form-action";
 import { useState, useTransition } from "react";
 import { addCampDays, deleteCamp, removeDay, saveCamp, updateDayCapacity } from "@/app/actions/admin-camps";
-import { longDate } from "@/lib/format";
+import { longDate, timeRange } from "@/lib/format";
 import { kindWords } from "@/lib/camp-kind";
 import type { Camp, CampKind } from "@/lib/types";
 
@@ -61,7 +61,7 @@ export function CampForm({ camp, defaultKind = "camp" }: { camp: Camp | null; de
   );
 }
 
-export function DaysEditor({ campId, days, kind = "camp" }: { campId: string; days: { id: string; date: string; capacity: number; taken: number }[]; kind?: CampKind }) {
+export function DaysEditor({ campId, days, kind = "camp" }: { campId: string; days: { id: string; date: string; capacity: number; taken: number; start_time?: string | null; end_time?: string | null }[]; kind?: CampKind }) {
   const w = kindWords(kind);
   const [state, action, pending] = useFormAction<Result>(addCampDays.bind(null, campId), { ok: false });
   const [msg, setMsg] = useState<Result | null>(null);
@@ -72,11 +72,12 @@ export function DaysEditor({ campId, days, kind = "camp" }: { campId: string; da
       {days.length ? (
         <div className="table-wrap">
           <table>
-            <thead><tr><th>{w.weekly ? "Session" : "Day"}</th><th>Booked</th><th>Places</th><th></th></tr></thead>
+            <thead><tr><th>{w.weekly ? "Session" : "Day"}</th><th>Time</th><th>Booked</th><th>Places</th><th></th></tr></thead>
             <tbody>
               {days.map((d) => (
                 <tr key={d.id}>
                   <td>{longDate(d.date)}</td>
+                  <td>{d.start_time && d.end_time ? timeRange(d.start_time, d.end_time) : ""}</td>
                   <td>{d.taken}</td>
                   <td>
                     <input className="input" type="number" min={0} defaultValue={d.capacity} style={{ width: 90 }} aria-label={`Places on ${longDate(d.date)}`}
@@ -96,8 +97,11 @@ export function DaysEditor({ campId, days, kind = "camp" }: { campId: string; da
         <div className="grid2">
           <label className="field">{w.weekly ? "First session" : "From"}<input name="from" type="date" required /></label>
           <label className="field">{w.weekly ? "Last session (end of term)" : "To (optional)"}<input name="to" type="date" /></label>
+          <label className="field">Start time (optional)<input name="slot_start" type="time" /></label>
+          <label className="field">Finish time (optional)<input name="slot_end" type="time" /></label>
           <label className="field">Places per {w.unit}<input name="capacity" type="number" min={0} defaultValue={w.weekly ? 20 : 30} /></label>
         </div>
+        <p className="hint">Leave the times blank to use the usual times above. To offer several times on the same day (for example 5pm and 6pm), add the dates once for each time.</p>
         {w.weekly ? (
           <>
             <input type="hidden" name="repeat" value="weekly" />

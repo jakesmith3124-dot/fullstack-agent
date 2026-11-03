@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { kindWords } from "@/lib/camp-kind";
+import { hasTimeSlots, kindWords, slotTime } from "@/lib/camp-kind";
 import { fmtDate, gbp } from "@/lib/format";
 import { quote, spaceLevel, spacesLeft } from "@/lib/pricing";
 import type { CampDay, CampKind } from "@/lib/types";
@@ -14,6 +14,7 @@ export function DayPicker({ slug, kind, days, pricePerDayPence, fullWeekPricePen
   slug: string; kind: CampKind; days: CampDay[]; pricePerDayPence: number; fullWeekPricePence: number | null; totalDays: number;
 }) {
   const w = kindWords(kind);
+  const slots = hasTimeSlots(days);
   const open = days.filter((d) => spacesLeft(d) > 0);
   const [picked, setPicked] = useState<string[]>([]);
   const q = quote({ pricePerDayPence, fullWeekPricePence, campDayCount: totalDays, selectedDayCount: picked.length, childCount: 1, siblingPct: 0 });
@@ -38,9 +39,10 @@ export function DayPicker({ slug, kind, days, pricePerDayPence, fullWeekPricePen
           const on = picked.includes(d.day_id);
           return (
             <button key={d.day_id} type="button" className="day" aria-pressed={on} disabled={left <= 0} onClick={() => toggle(d.day_id)}
-              aria-label={`${fmtDate(d.date, { weekday: "long", day: "numeric", month: "long" })}, ${left <= 0 ? "full" : `${left} spaces left`}`}>
+              aria-label={`${fmtDate(d.date, { weekday: "long", day: "numeric", month: "long" })}${slots ? ` at ${slotTime(d)}` : ""}, ${left <= 0 ? "full" : `${left} spaces left`}`}>
               <span className="dw">{fmtDate(d.date, w.weekly ? { month: "short" } : { weekday: "short" })}</span>
               <span className="dn">{fmtDate(d.date, { day: "numeric" })}</span>
+              {slots && <span className="dm slot">{slotTime(d)}</span>}
               <span className={`sp ${spaceLevel(d)}`}>{left <= 0 ? "Full" : `${left} left`}</span>
             </button>
           );

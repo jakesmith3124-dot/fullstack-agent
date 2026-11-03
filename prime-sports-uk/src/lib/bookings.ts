@@ -3,7 +3,7 @@ import { BookingCancelledEmail, BookingConfirmedEmail, InstalmentReceiptEmail, P
 import { getInstalmentRules } from "./data";
 import { notifyOwner, sendEmail } from "./email";
 import { addDays } from "./pricing";
-import { gbp, longDate, shortDay, timeRange, todayLondon } from "./format";
+import { fmtTime, gbp, longDate, shortDay, timeRange, todayLondon } from "./format";
 import { createAdminClient } from "./supabase/server";
 
 type Db = ReturnType<typeof createAdminClient>;
@@ -28,7 +28,7 @@ export type BookingSummary = {
   stripe_payment_method_id: string | null;
   discount_code_id: string | null;
   camp: { id: string; slug: string; school: string; area: string; address: string | null; postcode: string | null; start_time: string; end_time: string; what_to_bring: string | null };
-  days: { id: string; date: string }[];
+  days: { id: string; date: string; start_time: string | null; end_time: string | null }[];
   children: { id: string; first_name: string; last_name: string }[];
   instalments: { id: string; seq: number; due_date: string; amount_pence: number; status: string }[];
 };
@@ -37,13 +37,13 @@ export async function loadBooking(db: Db, by: { id?: string; ref?: string }): Pr
   let q = db
     .from("bookings")
     .select(
-      "id, ref, status, plan, instalment_count, total_pence, subtotal_pence, sibling_discount_pence, code_discount_pence, amount_paid_pence, amount_refunded_pence, parent_id, parent_name, parent_email, parent_phone, stripe_customer_id, stripe_payment_method_id, discount_code_id, camps(id, slug, school, area, address, postcode, start_time, end_time, what_to_bring), booking_places(camp_days(id, date), children(id, first_name, last_name)), instalments(id, seq, due_date, amount_pence, status)",
+      "id, ref, status, plan, instalment_count, total_pence, subtotal_pence, sibling_discount_pence, code_discount_pence, amount_paid_pence, amount_refunded_pence, parent_id, parent_name, parent_email, parent_phone, stripe_customer_id, stripe_payment_method_id, discount_code_id, camps(id, slug, school, area, address, postcode, start_time, end_time, what_to_bring), booking_places(camp_days(id, date, start_time, end_time), children(id, first_name, last_name)), instalments(id, seq, due_date, amount_pence, status)",
     );
   q = by.id ? q.eq("id", by.id) : q.eq("ref", by.ref!);
   const { data, error } = await q.maybeSingle();
   if (error || !data) return null;
-  const places = (data.booking_places ?? []) as unknown as { camp_days: { id: string; date: string }; children: { id: string; first_name: string; last_name: string } }[];
-  const days = [...new Map(places.map((p) => [p.camp_days.id, p.camp_days])).values()].sort((a, b) => a.date.localeCompare(b.date));
+  const places = (data.booking_places ?? []) as unknown as { camp_days: { id: string; date: string; start_time: string | null; end_time: string | null }; children: { id: string; first_name: string; last_name: string } }[];
+  const days = [...new Map(places.map((p) => [p.camp_days.id, p.camp_days])).values()].sort((a, b) => a.date.localeCompare(b.date) || (a.start_time ?? "").localeCompare(b.start_time ?? ""));
   const children = [...new Map(places.map((p) => [p.children.id, p.children])).values()];
   const { camps, booking_places: _bp, instalments, ...rest } = data as typeof data & { camps: BookingSummary["camp"] };
   void _bp;
@@ -66,7 +66,8 @@ export function bookingEmailData(b: BookingSummary): BookingEmailData {
     school: b.camp.school,
     address: [b.camp.address, b.camp.area, b.camp.postcode].filter(Boolean).join(", ") || null,
     times: timeRange(b.camp.start_time, b.camp.end_time),
-    days: b.days.map((d) => shortDay(d.date)),
+    // Sessions with their own times show them, e.g. "Tue 10 Nov, 5pm".
+    days: b.days.map((d) => `${shortDay(d.date)}${d.start_time ? `, ${fmtTime(d.start_time)}` : ""}`),
     children: b.children.map((c) => c.first_name),
     lines,
     total: gbp(b.total_pence),

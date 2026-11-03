@@ -111,19 +111,29 @@ export async function addCampDays(campId: string, _prev: ActionResult, fd: FormD
   const capacity = num(fd, "capacity");
   const weekdaysOnly = bool(fd, "weekdays_only");
   const weekly = str(fd, "repeat") === "weekly";
+  const slotStart = str(fd, "slot_start") || null;
+  const slotEnd = str(fd, "slot_end") || null;
+  if (!!slotStart !== !!slotEnd || (slotStart && slotEnd && slotEnd <= slotStart)) return { ok: false, error: "Give both a start and finish time, with the finish after the start." };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || to < from) return { ok: false, error: "Choose the first and last dates." };
   if (capacity === null || capacity < 0) return { ok: false, error: "Set the number of places." };
-  const rows: { camp_id: string; date: string; capacity: number }[] = [];
+  const rows: { camp_id: string; date: string; capacity: number; start_time: string | null; end_time: string | null }[] = [];
   for (let d = from; d <= to && rows.length < 60; d = addDays(d, weekly ? 7 : 1)) {
     const dow = new Date(`${d}T12:00:00Z`).getUTCDay();
     if (!weekly && weekdaysOnly && (dow === 0 || dow === 6)) continue;
-    rows.push({ camp_id: campId, date: d, capacity });
+    rows.push({ camp_id: campId, date: d, capacity, start_time: slotStart, end_time: slotEnd });
   }
   const supabase = await createClient();
-  const { error } = await supabase.from("camp_days").upsert(rows, { onConflict: "camp_id,date", ignoreDuplicates: true });
-  if (error) return { ok: false, error: error.message };
+  // Skip any date that already has a session at this start time.
+  const { data: existing } = await supabase.from("camp_days").select("date, start_time").eq("camp_id", campId);
+  const taken = new Set((existing ?? []).map((e) => `${e.date}|${e.start_time?.slice(0, 5) ?? ""}`));
+  const fresh = rows.filter((r) => !taken.has(`${r.date}|${r.start_time?.slice(0, 5) ?? ""}`));
+  if (fresh.length) {
+    const { error } = await supabase.from("camp_days").insert(fresh);
+    if (error) return { ok: false, error: error.message };
+  }
   refreshPublic();
-  return { ok: true, message: `Added ${rows.length} ${weekly ? "session" : "day"}${rows.length === 1 ? "" : "s"}.` };
+  const unit = weekly ? "session" : "day";
+  return { ok: true, message: `Added ${fresh.length} ${unit}${fresh.length === 1 ? "" : "s"}${rows.length > fresh.length ? ` (${rows.length - fresh.length} already there)` : ""}.` };
 }
 
 export async function updateDayCapacity(dayId: string, capacity: number): Promise<ActionResult> {

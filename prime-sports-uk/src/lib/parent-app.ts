@@ -30,10 +30,10 @@ export async function getToday(parentId: string, date = todayLondon()): Promise<
 
   const { data: places } = await supabase
     .from("booking_places")
-    .select("child_id, booking_id, camp_days(id, date, camps(id, school, address, area, postcode, start_time, end_time, timetable, brand)), bookings!inner(status)")
+    .select("child_id, booking_id, camp_days(id, date, start_time, end_time, camps(id, school, address, area, postcode, start_time, end_time, timetable, brand)), bookings!inner(status)")
     .in("child_id", childIds)
     .eq("bookings.status", "confirmed");
-  type Place = { child_id: string; booking_id: string; camp_days: { id: string; date: string; camps: { id: string; school: string; address: string | null; area: string; postcode: string | null; start_time: string; end_time: string; timetable: [string, string, string][]; brand: string } } };
+  type Place = { child_id: string; booking_id: string; camp_days: { id: string; date: string; start_time: string | null; end_time: string | null; camps: { id: string; school: string; address: string | null; area: string; postcode: string | null; start_time: string; end_time: string; timetable: [string, string, string][]; brand: string } } };
   const all = (places ?? []) as unknown as Place[];
   const today = all.filter((p) => p.camp_days.date === date);
   const { groups } = await getAgeGroups();
@@ -59,7 +59,7 @@ export async function getToday(parentId: string, date = todayLondon()): Promise<
       camp: {
         id: day.camps.id, school: day.camps.school,
         address: [day.camps.address, day.camps.area, day.camps.postcode].filter(Boolean).join(", ") || null,
-        times: timeRange(day.camps.start_time, day.camps.end_time), endTime: day.camps.end_time, timetable: day.camps.timetable ?? [],
+        times: timeRange(day.start_time ?? day.camps.start_time, day.end_time ?? day.camps.end_time), endTime: day.end_time ?? day.camps.end_time, timetable: day.camps.timetable ?? [],
       },
       status: entry?.signed_out_at ? "out" : entry?.signed_in_at ? "in" : "not_arrived",
       signedInAt: entry?.signed_in_at ?? null, signedOutAt: entry?.signed_out_at ?? null, collectedBy: entry?.collected_by ?? null,

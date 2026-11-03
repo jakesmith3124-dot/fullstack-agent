@@ -10,7 +10,7 @@ import { getCampBySlug, getCampSlugs, getFlags, isBookable } from "@/lib/data";
 import { SITE_URL } from "@/lib/env";
 import { dateRange, gbp, longDate, shortDay, timeRange, todayLondon } from "@/lib/format";
 import { spaceLevel, spacesLeft } from "@/lib/pricing";
-import { kindWords } from "@/lib/camp-kind";
+import { hasTimeSlots, kindWords, slotTime } from "@/lib/camp-kind";
 import { publicImageUrl } from "@/lib/storage";
 
 export const revalidate = 60;
@@ -43,14 +43,15 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
   const fullDays = upcoming.filter((d) => spaceLevel(d) === "full");
   const photo = publicImageUrl(camp.photo_path);
   const w = kindWords(camp.kind);
+  const slots = hasTimeSlots(upcoming);
   const mapQuery = encodeURIComponent([camp.school, camp.address, camp.postcode].filter(Boolean).join(", "));
 
   const events = upcoming.map((d) => ({
     "@context": "https://schema.org",
     "@type": "Event",
     name: `${camp.school} ${w.noun}`,
-    startDate: `${d.date}T${camp.start_time.slice(0, 5)}`,
-    endDate: `${d.date}T${camp.end_time.slice(0, 5)}`,
+    startDate: `${d.date}T${(d.start_time ?? camp.start_time).slice(0, 5)}`,
+    endDate: `${d.date}T${(d.end_time ?? camp.end_time).slice(0, 5)}`,
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     location: { "@type": "Place", name: camp.school, address: [camp.address, camp.area, camp.postcode].filter(Boolean).join(", ") },
@@ -80,7 +81,7 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
             <div className="camp-body">
               <span className="age">{camp.age_min} to {camp.age_max} Years</span>
               <p><b>{dateRange(camp.days.map((d) => d.date))}</b></p>
-              <p>{timeRange(camp.start_time, camp.end_time)}</p>
+              <p>{slots ? `Choose a time: ${[...new Set(upcoming.map(slotTime))].join(", ")}` : timeRange(camp.start_time, camp.end_time)}</p>
               <p>
                 From <b>{gbp(camp.price_per_day_pence)}</b> per {w.unit}
                 {camp.full_week_price_pence ? <> · <b>{gbp(camp.full_week_price_pence)}</b> for the {w.whole}</> : null}
@@ -104,7 +105,7 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
                     const left = spacesLeft(d);
                     return (
                       <li key={d.day_id}>
-                        <span>{shortDay(d.date)}</span>
+                        <span>{shortDay(d.date)}{slots ? `, ${slotTime(d)}` : ""}</span>
                         <span className={`sp ${spaceLevel(d)}`}>{left <= 0 ? "Full" : `${left} spaces left`}</span>
                       </li>
                     );
@@ -118,7 +119,7 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
               <div className="card">
                 <h2 className="h3-size">Join the waiting list</h2>
                 <p className="muted">We&apos;ll email you if a space opens up on a full {w.unit}.</p>
-                <WaitingListForm days={fullDays.map((d) => ({ id: d.day_id, label: longDate(d.date) }))} />
+                <WaitingListForm days={fullDays.map((d) => ({ id: d.day_id, label: `${longDate(d.date)}${slots ? `, ${slotTime(d)}` : ""}` }))} />
               </div>
             )}
             <div className="card">

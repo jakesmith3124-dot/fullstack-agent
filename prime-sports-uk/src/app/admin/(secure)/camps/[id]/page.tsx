@@ -16,14 +16,14 @@ export default async function CampEditPage({ params, searchParams }: PageProps<"
   await requireOwner(`/admin/camps/${id}`);
   const isNew = id === "new";
   let camp: Camp | null = null;
-  let days: { id: string; date: string; capacity: number; taken: number }[] = [];
+  let days: { id: string; date: string; capacity: number; taken: number; start_time: string | null; end_time: string | null }[] = [];
   if (!isNew) {
     const supabase = await createClient();
     const { data } = await supabase.from("camps").select("*").eq("id", id).maybeSingle();
     if (!data) notFound();
     camp = data as Camp;
     const { data: avail } = await supabase.rpc("camp_availability", { p_camp: id });
-    days = ((avail ?? []) as { day_id: string; date: string; capacity: number; taken: number }[]).map((d) => ({ id: d.day_id, date: d.date, capacity: d.capacity, taken: d.taken }));
+    days = ((avail ?? []) as { day_id: string; date: string; capacity: number; taken: number; start_time: string | null; end_time: string | null }[]).map((d) => ({ id: d.day_id, date: d.date, capacity: d.capacity, taken: d.taken, start_time: d.start_time, end_time: d.end_time }));
   }
   const newKind: CampKind = sp.kind === "club" || sp.kind === "darts" ? sp.kind : "camp";
   const kind = camp?.kind ?? newKind;

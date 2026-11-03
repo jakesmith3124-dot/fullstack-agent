@@ -14,25 +14,27 @@ export async function GET(request: Request) {
   const tomorrow = addDays(todayLondon(), 1);
   const { data } = await db
     .from("bookings")
-    .select("id, parent_id, parent_name, parent_email, camps(school, address, area, postcode, start_time, end_time, what_to_bring), booking_places(camp_days(date), children(first_name))")
+    .select("id, parent_id, parent_name, parent_email, camps(school, address, area, postcode, start_time, end_time, what_to_bring), booking_places(camp_days(date, start_time, end_time), children(first_name))")
     .eq("status", "confirmed")
     .is("reminder_sent_at", null);
   let sent = 0;
   for (const b of data ?? []) {
-    const places = (b.booking_places ?? []) as unknown as { camp_days: { date: string }; children: { first_name: string } }[];
+    const places = (b.booking_places ?? []) as unknown as { camp_days: { date: string; start_time: string | null; end_time: string | null }; children: { first_name: string } }[];
     const first = places.map((p) => p.camp_days.date).sort()[0];
     if (first !== tomorrow) continue;
     const camp = b.camps as unknown as { school: string; address: string | null; area: string; postcode: string | null; start_time: string; end_time: string; what_to_bring: string | null };
+    const slot = places.map((p) => p.camp_days).filter((d) => d.date === first).sort((a, b) => (a.start_time ?? "").localeCompare(b.start_time ?? ""))[0];
+    const times = timeRange(slot?.start_time ?? camp.start_time, slot?.end_time ?? camp.end_time);
     const children = [...new Set(places.map((p) => p.children.first_name))];
     await sendEmail({
       to: b.parent_email,
       subject: `See you tomorrow at ${camp.school}`,
       react: CampReminderEmail({
         parentName: b.parent_name, school: camp.school, address: [camp.address, camp.area, camp.postcode].filter(Boolean).join(", ") || null,
-        date: longDate(first), times: timeRange(camp.start_time, camp.end_time), children, whatToBring: camp.what_to_bring,
+        date: longDate(first), times, children, whatToBring: camp.what_to_bring,
       }),
     });
-    await notifyParent(b.parent_id, "pickup_reminder", { title: "Camp tomorrow", body: `${children.join(" and ")} ${children.length > 1 ? "are" : "is"} booked in at ${camp.school} tomorrow, ${timeRange(camp.start_time, camp.end_time)}.`, url: "/app" }, { emailFallback: false });
+    await notifyParent(b.parent_id, "pickup_reminder", { title: "Camp tomorrow", body: `${children.join(" and ")} ${children.length > 1 ? "are" : "is"} booked in at ${camp.school} tomorrow, ${times}.`, url: "/app" }, { emailFallback: false });
     await db.from("bookings").update({ reminder_sent_at: new Date().toISOString() }).eq("id", b.id);
     sent++;
   }

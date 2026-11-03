@@ -21,7 +21,7 @@ join (values
   ('example-thornton-christmas-2026', '2026-12-21', 24),
   ('example-thornton-christmas-2026', '2026-12-22', 24),
   ('example-thornton-christmas-2026', '2026-12-23', 24)) d(slug, date, cap) on d.slug = c.slug
-on conflict (camp_id, date) do nothing;
+on conflict do nothing;
 
 -- A working example discount code for local testing.
 insert into public.discount_codes (code, label, kind, value, active) values ('TEST5', 'Test £5 off', 'fixed', 500, true)

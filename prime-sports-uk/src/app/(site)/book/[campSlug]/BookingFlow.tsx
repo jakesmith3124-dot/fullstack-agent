@@ -11,7 +11,7 @@ import { SchoolLogo } from "@/components/CampCard";
 import { WaitingListForm } from "@/components/WaitingListForm";
 import { ageOn, fmtDate, gbp, longDate, shortDay, timeRange } from "@/lib/format";
 import { instalmentOptions, instalmentSchedule, quote, spaceLevel, spacesLeft, type DiscountCode, type InstalmentRules } from "@/lib/pricing";
-import { kindWords } from "@/lib/camp-kind";
+import { hasTimeSlots, kindWords, slotTime } from "@/lib/camp-kind";
 import type { CampKind } from "@/lib/types";
 import { childSchema, parentSchema, type ChildInput, type ParentInput } from "@/lib/validation";
 
@@ -20,7 +20,7 @@ type CampInfo = {
   price_per_day_pence: number; full_week_price_pence: number | null; logo_path: string | null; photo_path: string | null; total_days: number;
   kind: CampKind;
 };
-type Day = { day_id: string; date: string; capacity: number; taken: number };
+type Day = { day_id: string; date: string; capacity: number; taken: number; start_time?: string | null; end_time?: string | null };
 export type SavedChild = { id: string; first_name: string; last_name: string; dob: string; school: string | null; medical: string | null; allergies: string | null; send: string | null; photo_consent: boolean; collectors: string[] };
 export type SavedParent = { full_name: string | null; email: string | null; phone: string | null; emergency_name: string | null; emergency_phone: string | null; emergency_relationship: string | null };
 type Payments = { mode: "stripe"; key: string } | { mode: "fake" } | { mode: "off" };
@@ -63,6 +63,7 @@ export function BookingFlow(props: {
     selectedDayCount: picked.length, childCount: Math.max(1, kids.length), siblingPct, code,
   });
   const w = kindWords(camp.kind);
+  const slots = hasTimeSlots(days);
   // Clubs and darts are paid in full (weekly or for the whole term).
   const options = firstDay && !w.weekly ? instalmentOptions(today, firstDay, rules) : [];
   const effectivePlan: "full" | number = plan !== "full" && options.includes(plan) ? plan : "full";
@@ -149,7 +150,7 @@ export function BookingFlow(props: {
         <div><b>{camp.school}</b><p className="hint">{camp.area} · {timeRange(camp.start_time, camp.end_time)}</p></div>
       </div>
       {picked.length ? (
-        <div className="chips">{chosenDates.map((d) => <span key={d} className="tag gold">{shortDay(d)}</span>)}</div>
+        <div className="chips">{days.filter((d) => picked.includes(d.day_id)).map((d) => <span key={d.day_id} className="tag gold">{shortDay(d.date)}{slots ? ` ${slotTime(d)}` : ""}</span>)}</div>
       ) : <p className="hint">No {w.units} picked yet.</p>}
       {picked.length > 0 && kids.map((k, i) => (
         <div className="line" key={i}><span>{(k.first_name || `Child ${i + 1}`)} · {picked.length} {picked.length > 1 ? w.units : w.unit}</span><span>{gbp(q.perChildPence)}</span></div>
@@ -208,12 +209,12 @@ export function BookingFlow(props: {
                         className="day"
                         aria-pressed={on}
                         disabled={left <= 0}
-                        aria-label={`${longDate(d.date)}, ${left <= 0 ? "full" : `${left} spaces left`}`}
+                        aria-label={`${longDate(d.date)}${slots ? ` at ${slotTime(d)}` : ""}, ${left <= 0 ? "full" : `${left} spaces left`}`}
                         onClick={() => { setPicked((p) => (on ? p.filter((x) => x !== d.day_id) : [...p, d.day_id])); invalidate(); }}
                       >
                         <span className="dw">{fmtDate(d.date, w.weekly ? { month: "short" } : { weekday: "short" })}</span>
                         <span className="dn">{fmtDate(d.date, { day: "numeric" })}</span>
-                        <span className="dm">{fmtDate(d.date, { month: "short" })}</span>
+                        <span className="dm">{slots ? slotTime(d) : fmtDate(d.date, { month: "short" })}</span>
                         <span className={`sp ${spaceLevel(d)}`}>{left <= 0 ? "Full" : `${left} left`}</span>
                       </button>
                     );
@@ -224,7 +225,7 @@ export function BookingFlow(props: {
                     <button type="button" className="link" style={{ justifySelf: "start" }} onClick={() => setShowWaiting((s) => !s)} aria-expanded={showWaiting}>
                       {fullDays.length === 1 ? `That ${w.unit} is full.` : `Some ${w.units} are full.`} Join the waiting list
                     </button>
-                    {showWaiting && <WaitingListForm days={fullDays.map((d) => ({ id: d.day_id, label: longDate(d.date) }))} />}
+                    {showWaiting && <WaitingListForm days={fullDays.map((d) => ({ id: d.day_id, label: `${longDate(d.date)}${slots ? `, ${slotTime(d)}` : ""}` }))} />}
                   </div>
                 )}
                 <button className="btn" type="button" disabled={!picked.length} onClick={() => go(1)}>Continue</button>

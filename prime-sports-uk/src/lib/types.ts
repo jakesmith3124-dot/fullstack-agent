@@ -32,7 +32,7 @@ export type Camp = {
   is_demo: boolean;
 };
 
-export type CampDay = { day_id: string; date: string; capacity: number; taken: number };
+export type CampDay = { day_id: string; date: string; capacity: number; taken: number; start_time?: string | null; end_time?: string | null };
 export type CampWithDays = Camp & { days: CampDay[] };
 
 export type ContentItem<T = Record<string, unknown>> = {
