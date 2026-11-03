@@ -4,13 +4,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SchoolLogo } from "@/components/CampCard";
 import { CampPoster } from "@/components/CampPoster";
+import { CampRibbons, FillBar } from "@/components/CampRibbons";
 import { DayPicker } from "@/components/DayPicker";
 import { JsonLd } from "@/components/JsonLd";
 import { WaitingListForm } from "@/components/WaitingListForm";
 import { getCampBySlug, getCampSlugs, getFlags, isBookable } from "@/lib/data";
 import { SITE_URL } from "@/lib/env";
 import { dateRange, gbp, longDate, shortDay, timeRange, todayLondon } from "@/lib/format";
-import { spaceLevel, spacesLeft } from "@/lib/pricing";
+import { fillStatus, spaceLevel, spacesLeft } from "@/lib/pricing";
 import { hasTimeSlots, kindWords, slotTime } from "@/lib/camp-kind";
 import { publicImageUrl } from "@/lib/storage";
 
@@ -45,6 +46,7 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
   const photo = publicImageUrl(camp.photo_path);
   const w = kindWords(camp.kind);
   const slots = hasTimeSlots(upcoming);
+  const fill = fillStatus(upcoming);
   const mapQuery = encodeURIComponent([camp.school, camp.address, camp.postcode].filter(Boolean).join(", "));
 
   const events = upcoming.map((d) => ({
@@ -77,10 +79,12 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
           <div className="camp" style={{ alignSelf: "start" }}>
             <div className="camp-img">
               {photo ? <Image src={photo} alt={camp.photo_alt || `Children at ${camp.school}`} fill sizes="(max-width: 820px) 100vw, 560px" priority /> : <CampPoster kind={camp.kind} slug={camp.slug} area={camp.area} dates={upcoming.map((d) => d.date)} ageMin={camp.age_min} ageMax={camp.age_max} />}
+              <CampRibbons badge={camp.badge} fill={fill} />
               <SchoolLogo school={camp.school} logoPath={camp.logo_path} />
             </div>
             <div className="camp-body">
               <span className="age">{camp.age_min} to {camp.age_max} Years</span>
+              <FillBar fill={fill} unit={w.unit} />
               <p><b>{dateRange(camp.days.map((d) => d.date))}</b></p>
               <p>{slots ? `Choose a time: ${[...new Set(upcoming.map(slotTime))].join(", ")}` : timeRange(camp.start_time, camp.end_time)}</p>
               <p>

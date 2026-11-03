@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { dateRange, fmtDate, gbp, initials, shortDay, timeRange } from "@/lib/format";
-import { spaceLevel, spacesLeft } from "@/lib/pricing";
+import { fillStatus, spaceLevel, spacesLeft } from "@/lib/pricing";
 import { CampPoster } from "@/components/CampPoster";
+import { CampRibbons, FillBar } from "@/components/CampRibbons";
 import { kindWords } from "@/lib/camp-kind";
 import { publicImageUrl } from "@/lib/storage";
 import type { CampKind } from "@/lib/types";
@@ -10,6 +11,7 @@ import type { CampKind } from "@/lib/types";
 export type CampCardData = {
   slug: string;
   kind?: CampKind;
+  badge?: string | null;
   school: string;
   area: string;
   age_min: number;
@@ -38,15 +40,17 @@ export function CampCard({ camp, index = 0 }: { camp: CampCardData; index?: numb
   const photo = publicImageUrl(camp.photo_path);
   const flagged = camp.days.filter((d) => spaceLevel(d) !== "ok");
   const w = kindWords(camp.kind);
+  const fill = fillStatus(camp.days);
   const allFull = camp.days.length > 0 && camp.days.every((d) => spaceLevel(d) === "full");
   return (
-    <article className="camp">
+    <article className={`camp${camp.badge && /premium|elite/i.test(camp.badge) ? " is-premium" : ""}`}>
       <div className={`camp-img${index % 2 ? " alt" : ""}`}>
         {photo ? (
           <Image src={photo} alt={camp.photo_alt || `Children at ${camp.school}`} fill sizes="(max-width: 760px) 100vw, 760px" />
         ) : (
           <CampPoster kind={camp.kind} slug={camp.slug} area={camp.area} dates={camp.days.map((d) => d.date)} ageMin={camp.age_min} ageMax={camp.age_max} />
         )}
+        <CampRibbons badge={camp.badge} fill={fill} />
         <SchoolLogo school={camp.school} logoPath={camp.logo_path} />
       </div>
       <div className="camp-body">
@@ -55,6 +59,7 @@ export function CampCard({ camp, index = 0 }: { camp: CampCardData; index?: numb
         <span className="age">{camp.age_min} to {camp.age_max} Years</span>
         <p><b>{w.weekly && camp.days.length ? `${fmtDate(camp.days[0].date, { weekday: "long" })}s · ${camp.days.length} sessions · ` : ""}{dateRange(camp.days.map((d) => d.date))}</b></p>
         <p>{timeRange(camp.start_time, camp.end_time)} · from {gbp(camp.price_per_day_pence)} per {w.unit}</p>
+        <FillBar fill={fill} unit={w.unit} />
         {flagged.length > 0 && (
           <div className="day-flags" aria-label="Days filling up">
             {flagged.map((d) => {

@@ -24,6 +24,13 @@ export function CampForm({ camp, defaultKind = "camp" }: { camp: Camp | null; de
         </select>
       </label>
       <label className="field">School or venue name<input name="school" defaultValue={c?.school} required /></label>
+      <label className="field">Card badge (optional)
+        <input name="badge" list="badge-options" maxLength={24} defaultValue={c?.badge ?? ""} placeholder="e.g. Premium" />
+        <datalist id="badge-options">
+          {["Premium", "New venue", "Most popular", "Early bird", "Limited places", "Elite coaching"].map((b) => <option key={b} value={b} />)}
+        </datalist>
+        <span className="hint">Shown on the top of the card. &quot;Premium&quot; gets a black and gold style. &quot;Filling fast&quot; and &quot;Almost full&quot; are added automatically from bookings.</span>
+      </label>
       <div className="grid2">
         <label className="field">Area / town<input name="area" defaultValue={c?.area} placeholder="Halifax" required /></label>
         <label className="field">Brand

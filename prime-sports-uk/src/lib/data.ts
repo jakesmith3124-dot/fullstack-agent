@@ -87,7 +87,7 @@ export async function getContent() {
 }
 
 const CAMP_COLUMNS =
-  "id, slug, brand, kind, school, area, address, postcode, description, age_min, age_max, start_time, end_time, price_per_day_pence, full_week_price_pence, booking_opens_at, booking_closes_at, photo_path, photo_alt, logo_path, logo_original_path, what_to_bring, timetable, sort_order, is_visible, confirmed, is_demo";
+  "id, slug, brand, kind, badge, school, area, address, postcode, description, age_min, age_max, start_time, end_time, price_per_day_pence, full_week_price_pence, booking_opens_at, booking_closes_at, photo_path, photo_alt, logo_path, logo_original_path, what_to_bring, timetable, sort_order, is_visible, confirmed, is_demo";
 
 const cachedCamps = unstable_cache(
   async (): Promise<Camp[]> => {

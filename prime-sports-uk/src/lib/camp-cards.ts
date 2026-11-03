@@ -6,6 +6,7 @@ export function toCardData(c: CampWithDays, flags: Flags): CampCardData & { addr
   return {
     slug: c.slug,
     kind: c.kind ?? "camp",
+    badge: c.badge ?? null,
     school: c.school,
     area: c.area,
     address: c.address,

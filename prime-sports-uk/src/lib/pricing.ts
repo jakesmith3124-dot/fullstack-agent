@@ -124,3 +124,18 @@ export function spaceLevel(d: DayAvailability): SpaceLevel {
   const left = spacesLeft(d);
   return left <= 0 ? "full" : left <= 8 ? "low" : "ok";
 }
+
+export type FillStatus = { level: "sold_out" | "almost_full" | "filling" | null; label: string | null; pct: number; placesLeft: number };
+
+/** How full a camp is overall, for the card ribbon and bar. Quiet until it's worth shouting about. */
+export function fillStatus(days: DayAvailability[]): FillStatus {
+  const capacity = days.reduce((n, d) => n + d.capacity, 0);
+  const placesLeft = days.reduce((n, d) => n + spacesLeft(d), 0);
+  const pct = capacity ? Math.round(((capacity - placesLeft) / capacity) * 100) : 0;
+  if (!days.length || !capacity) return { level: null, label: null, pct, placesLeft };
+  if (placesLeft === 0) return { level: "sold_out", label: "Sold out", pct, placesLeft };
+  const openDays = days.filter((d) => spacesLeft(d) > 0);
+  if (pct >= 80 || openDays.some((d) => spacesLeft(d) <= 3)) return { level: "almost_full", label: "Almost full", pct, placesLeft };
+  if (pct >= 50) return { level: "filling", label: "Filling fast", pct, placesLeft };
+  return { level: null, label: null, pct, placesLeft };
+}

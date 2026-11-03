@@ -1177,3 +1177,6 @@ language sql stable security definer set search_path = public as $$
 $$;
 grant execute on function public.camp_availability(uuid) to anon, authenticated, service_role;
 notify pgrst, 'reload schema';
+-- Optional badge the owner sets on a camp card, e.g. "Premium" or "New venue".
+alter table public.camps add column if not exists badge text check (badge is null or length(badge) <= 24);
+notify pgrst, 'reload schema';

@@ -28,6 +28,7 @@ export async function saveCamp(campId: string | null, _prev: ActionResult, fd: F
   const row = {
     school, area,
     brand: (["prime_camps", "prime_darts"].includes(str(fd, "brand")) ? str(fd, "brand") : "holiday") as Camp["brand"],
+    badge: str(fd, "badge").slice(0, 24) || null,
     kind: (["club", "darts"].includes(str(fd, "kind")) ? str(fd, "kind") : "camp") as CampKind,
     address: str(fd, "address") || null,
     postcode: str(fd, "postcode").toUpperCase() || null,

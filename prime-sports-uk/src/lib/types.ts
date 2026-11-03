@@ -7,6 +7,8 @@ export type Camp = {
   brand: "holiday" | "prime_camps" | "prime_darts";
   /** camp: holiday camp (days). club: school club, darts: darts sessions (weekly sessions, termly price). */
   kind: CampKind;
+  /** Owner-chosen card badge, e.g. "Premium". */
+  badge?: string | null;
   school: string;
   area: string;
   address: string | null;
