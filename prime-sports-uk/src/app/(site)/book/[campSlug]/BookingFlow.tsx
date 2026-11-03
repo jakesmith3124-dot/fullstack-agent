@@ -31,13 +31,14 @@ const blankKid = (): Kid => ({ first_name: "", last_name: "", dob: "", school: "
 let stripePromise: Promise<Stripe | null> | null = null;
 
 export function BookingFlow(props: {
-  camp: CampInfo; days: Day[]; siblingPct: number; rules: InstalmentRules; today: string; signedIn: boolean;
+  camp: CampInfo; days: Day[]; initialPicked?: string[]; siblingPct: number; rules: InstalmentRules; today: string; signedIn: boolean;
   savedChildren: SavedChild[]; savedParent: SavedParent | null; payments: Payments;
 }) {
   const { camp, days, siblingPct, rules, today, savedChildren, savedParent, payments } = props;
   const router = useRouter();
-  const [step, setStep] = useState(0);
-  const [picked, setPicked] = useState<string[]>([]);
+  // Days chosen on the camp page skip straight to "Who's coming".
+  const [step, setStep] = useState(props.initialPicked?.length ? 1 : 0);
+  const [picked, setPicked] = useState<string[]>(props.initialPicked ?? []);
   const [kids, setKids] = useState<Kid[]>(savedChildren.length ? [] : [blankKid()]);
   const [parent, setParent] = useState<ParentInput>({
     name: savedParent?.full_name ?? "", phone: savedParent?.phone ?? "", email: savedParent?.email ?? "",

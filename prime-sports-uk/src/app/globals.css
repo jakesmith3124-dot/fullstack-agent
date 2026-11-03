@@ -544,3 +544,16 @@ section { padding-block: 4.5rem; }
 .hf-go { width: 100%; justify-content: center; font-size: 1.05rem; padding-block: 0.95rem; }
 .hf-live { margin: 0; font-size: 0.85rem; color: #bbb; text-align: center; }
 .hero .hero-finder p { margin: 0; max-width: none; }
+
+/* Camp page day picker: choose days and see the price before starting the booking. */
+.dp { display: grid; gap: 0.9rem; }
+.dp-bar { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.9rem 1rem; border-radius: 16px; background: #111; color: #fff; }
+.dp-sum { display: grid; line-height: 1.25; }
+.dp-sum b { font: 800 1.6rem var(--display); color: var(--accent); }
+.dp-sum span { font-size: 0.85rem; color: #ccc; }
+.dp-bar .btn[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
+@media (max-width: 760px) {
+  .dp-bar { position: fixed; left: 0.6rem; right: 0.6rem; bottom: calc(0.6rem + env(safe-area-inset-bottom)); z-index: 40; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); transform: translateY(140%); transition: transform 0.25s ease; }
+  .dp-bar.on { transform: none; }
+  body:has(.dp-bar.on) { padding-bottom: 6rem; }
+}

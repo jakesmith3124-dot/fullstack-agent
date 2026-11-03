@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SchoolLogo } from "@/components/CampCard";
+import { DayPicker } from "@/components/DayPicker";
 import { JsonLd } from "@/components/JsonLd";
 import { WaitingListForm } from "@/components/WaitingListForm";
 import { getCampBySlug, getCampSlugs, getFlags, isBookable } from "@/lib/data";
@@ -87,6 +88,12 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
             </div>
           </div>
           <div style={{ display: "grid", gap: "1.2rem", alignContent: "start" }}>
+            {bookable && fullDays.length < upcoming.length ? (
+              <div className="card">
+                <DayPicker slug={camp.slug} kind={camp.kind ?? "camp"} days={upcoming} pricePerDayPence={camp.price_per_day_pence}
+                  fullWeekPricePence={camp.full_week_price_pence} totalDays={camp.days.length} />
+              </div>
+            ) : (
             <div className="card">
               <h2 className="h3-size">{w.weekly ? "Sessions and spaces" : "Days and spaces"}</h2>
               {past ? (
@@ -104,11 +111,9 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
                   })}
                 </ul>
               )}
-              {bookable && fullDays.length < upcoming.length && (
-                <Link className="btn" href={`/book/${camp.slug}`}>Book now →</Link>
-              )}
               {!past && !bookable && <p className="muted">Bookings aren&apos;t open yet.</p>}
             </div>
+            )}
             {fullDays.length > 0 && (
               <div className="card">
                 <h2 className="h3-size">Join the waiting list</h2>

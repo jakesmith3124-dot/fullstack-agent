@@ -11,8 +11,9 @@ import { BookingFlow, type SavedChild, type SavedParent } from "./BookingFlow";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Book a holiday camp", robots: { index: false } };
 
-export default async function BookPage({ params }: PageProps<"/book/[campSlug]">) {
+export default async function BookPage({ params, searchParams }: PageProps<"/book/[campSlug]">) {
   const { campSlug } = await params;
+  const sp = await searchParams;
   const [camp, flags, sibling, rules, viewer] = await Promise.all([
     getCampBySlug(campSlug), getFlags(), getSiblingDiscount(), getInstalmentRules(), getViewer(),
   ]);
@@ -53,6 +54,7 @@ export default async function BookPage({ params }: PageProps<"/book/[campSlug]">
         total_days: camp.days.length, kind: camp.kind ?? "camp",
       }}
       days={days}
+      initialPicked={typeof sp.days === "string" ? sp.days.split(",").filter((id) => days.some((d) => d.day_id === id && d.capacity > d.taken)) : []}
       siblingPct={sibling.confirmed ? sibling.pct : 0}
       rules={rules}
       today={today}
