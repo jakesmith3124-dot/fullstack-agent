@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { assertOwner, audit } from "@/lib/auth";
 import { bool, londonDateTime, num, pounds, refreshPublic, str, type ActionResult } from "@/lib/admin";
 import { slugify } from "@/lib/format";
-import type { CampKind } from "@/lib/types";
+import type { Camp, CampKind } from "@/lib/types";
 import { processLogo, processPhoto } from "@/lib/images";
 import { addDays } from "@/lib/pricing";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
@@ -27,7 +27,7 @@ export async function saveCamp(campId: string | null, _prev: ActionResult, fd: F
   if (price === null || price < 0) return { ok: false, error: "Add a price." };
   const row = {
     school, area,
-    brand: str(fd, "brand") === "prime_camps" ? "prime_camps" : "holiday",
+    brand: (["prime_camps", "prime_darts"].includes(str(fd, "brand")) ? str(fd, "brand") : "holiday") as Camp["brand"],
     kind: (["club", "darts"].includes(str(fd, "kind")) ? str(fd, "kind") : "camp") as CampKind,
     address: str(fd, "address") || null,
     postcode: str(fd, "postcode").toUpperCase() || null,

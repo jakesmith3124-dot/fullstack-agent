@@ -1153,3 +1153,7 @@ on conflict (key) do nothing;
 -- (full_week_price_pence is the full-term price for clubs and darts).
 alter table public.camps add column if not exists kind text not null default 'camp'
   check (kind in ('camp', 'club', 'darts'));
+-- Prime Sports Darts as a brand alongside Prime Sports UK and Prime Camps.
+alter table public.camps drop constraint if exists camps_brand_check;
+alter table public.camps add constraint camps_brand_check check (brand in ('holiday', 'prime_camps', 'prime_darts'));
+notify pgrst, 'reload schema';

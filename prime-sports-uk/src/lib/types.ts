@@ -4,7 +4,7 @@ export type CampKind = "camp" | "club" | "darts";
 export type Camp = {
   id: string;
   slug: string;
-  brand: "holiday" | "prime_camps";
+  brand: "holiday" | "prime_camps" | "prime_darts";
   /** camp: holiday camp (days). club: school club, darts: darts sessions (weekly sessions, termly price). */
   kind: CampKind;
   school: string;

@@ -27,7 +27,7 @@ export function CampForm({ camp, defaultKind = "camp" }: { camp: Camp | null; de
       <div className="grid2">
         <label className="field">Area / town<input name="area" defaultValue={c?.area} placeholder="Halifax" required /></label>
         <label className="field">Brand
-          <select name="brand" defaultValue={c?.brand ?? "holiday"}><option value="holiday">Prime Sports UK holiday camp</option><option value="prime_camps">Prime Camps</option></select>
+          <select name="brand" defaultValue={c?.brand ?? "holiday"}><option value="holiday">Prime Sports UK</option><option value="prime_camps">Prime Camps</option><option value="prime_darts">Prime Sports Darts</option></select>
         </label>
       </div>
       <label className="field">Address<input name="address" defaultValue={c?.address ?? ""} /></label>

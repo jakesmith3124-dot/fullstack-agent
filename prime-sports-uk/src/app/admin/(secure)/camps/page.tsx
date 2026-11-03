@@ -43,7 +43,7 @@ export default async function CampsAdmin({ searchParams }: PageProps<"/admin/cam
               <div className="row">
                 <div>
                   <h2 style={{ fontSize: "1.3rem" }}><Link href={`/admin/camps/${c.id}`}>{c.school}</Link></h2>
-                  <p className="muted">{c.area} · {dates.length ? dateRange(dates) : "No days yet"} · {gbp(c.price_per_day_pence)}/{w.unit}{c.brand === "prime_camps" ? " · Prime Camps" : ""}</p>
+                  <p className="muted">{c.area} · {dates.length ? dateRange(dates) : "No days yet"} · {gbp(c.price_per_day_pence)}/{w.unit}{c.brand === "prime_camps" ? " · Prime Camps" : c.brand === "prime_darts" ? " · Prime Sports Darts" : ""}</p>
                 </div>
                 <div className="chips">
                   {c.is_demo && <span className="tag ph">Example</span>}
