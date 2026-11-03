@@ -4,18 +4,20 @@ import { CampCard, type CampCardData } from "./CampCard";
 
 const PAGE = 12;
 
-export function CampFinder({ camps, initialQuery = "", layout = "list", after }: {
+export function CampFinder({ camps, initialQuery = "", initialAge = null, layout = "list", after }: {
   camps: (CampCardData & { address?: string | null; postcode?: string | null })[];
   initialQuery?: string;
+  initialAge?: number | null;
   layout?: "list" | "grid";
   after?: ReactNode;
 }) {
   const [q, setQ] = useState(initialQuery);
   const [shown, setShown] = useState(PAGE);
+  const [age, setAge] = useState<number | null>(initialAge);
   const areas = useMemo(() => [...new Set(camps.map((c) => c.area))].sort(), [camps]);
   const term = q.trim().toLowerCase();
   const list = camps.filter(
-    (c) => !term || [c.area, c.school, c.address, c.postcode].filter(Boolean).join(" ").toLowerCase().includes(term),
+    (c) => (age === null || (age >= c.age_min && age <= c.age_max)) && (!term || [c.area, c.school, c.address, c.postcode].filter(Boolean).join(" ").toLowerCase().includes(term)),
   );
 
   return (
@@ -30,6 +32,11 @@ export function CampFinder({ camps, initialQuery = "", layout = "list", after }:
           value={q}
           onChange={(e) => { setQ(e.target.value); setShown(PAGE); }}
         />
+        {age !== null && (
+          <div className="chips">
+            <button type="button" className="chip" aria-pressed="true" onClick={() => setAge(null)}>Age {age} ✕<span className="sr-only"> (remove age filter)</span></button>
+          </div>
+        )}
         {areas.length > 1 && (
           <div className="chips" role="group" aria-label="Filter by area">
             {areas.map((a) => (

@@ -15,6 +15,8 @@ export const metadata: Metadata = {
 export default async function CampsPage({ searchParams }: PageProps<"/camps">) {
   const [camps, flags, sp] = await Promise.all([getUpcomingCamps(), getFlags(), searchParams]);
   const q = typeof sp.q === "string" ? sp.q : "";
+  const ageNum = typeof sp.age === "string" ? Number(sp.age) : NaN;
+  const age = Number.isInteger(ageNum) && ageNum >= 2 && ageNum <= 18 ? ageNum : null;
   const areas = [...new Set(camps.map((c) => c.area))].sort();
   return (
     <>
@@ -27,7 +29,7 @@ export default async function CampsPage({ searchParams }: PageProps<"/camps">) {
       </div>
       <section style={{ paddingTop: "1rem" }}>
         <div className="wrap">
-          <CampFinder camps={camps.map((c) => toCardData(c, flags))} initialQuery={q} layout="grid" />
+          <CampFinder camps={camps.map((c) => toCardData(c, flags))} initialQuery={q} initialAge={age} layout="grid" />
           {areas.length > 0 && (
             <p className="muted center" style={{ marginTop: "2.5rem" }}>
               Browse by area:{" "}

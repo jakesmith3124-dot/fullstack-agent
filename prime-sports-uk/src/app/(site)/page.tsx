@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CampFinder } from "@/components/CampFinder";
+import { HeroFinder, type FinderItem } from "@/components/HeroFinder";
 import { ContentImage } from "@/components/ContentImage";
 import { JsonLd, localBusinessJsonLd } from "@/components/JsonLd";
 import { SafetyGrid } from "@/components/SafetyGrid";
@@ -28,7 +29,12 @@ const SERVICES: [string, string][] = [
 ];
 
 export default async function HomePage() {
-  const [content, camps, flags] = await Promise.all([getContent(), getUpcomingCamps(), getFlags()]);
+  const [content, everything, flags] = await Promise.all([getContent(), getUpcomingCamps(["camp", "club", "darts"]), getFlags()]);
+  const camps = everything.filter((c) => c.kind === "camp");
+  const finderItems: FinderItem[] = everything.map((c) => ({
+    kind: c.kind, area: c.area, age_min: c.age_min, age_max: c.age_max,
+    full: c.days.every((d) => d.capacity - d.taken <= 0),
+  }));
   const hero = content.get<Text>("home.hero");
   const badges = content.section<{ title: string }>("home.badges");
   const philosophy = content.get<Text>("home.philosophy");
@@ -49,10 +55,8 @@ export default async function HomePage() {
             {hero?.eyebrow && <div className="eyebrow">{hero.eyebrow}</div>}
             <h1>{hero?.title ?? "Inspiring children to move, play and grow."}</h1>
             {hero?.body && <p>{hero.body}</p>}
-            <div className="actions">
-              <Link className="btn" href="/camps">Book a session →</Link>
-              <Link className="btn ghost" href="/contact">Get in touch</Link>
-            </div>
+            <HeroFinder items={finderItems} />
+            <p style={{ marginTop: ".8rem" }}><Link className="link" href="/contact" style={{ color: "#fff" }}>Booking for a school or group? Get in touch →</Link></p>
             {badges.length > 0 && (
               <div className="badges">
                 {badges.map((b) => <span key={b.key}><b aria-hidden="true">✓</b> {b.data.title}</span>)}
