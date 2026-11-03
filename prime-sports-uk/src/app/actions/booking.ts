@@ -67,6 +67,7 @@ export async function startBooking(raw: BookingInput): Promise<StartResult> {
 
   let instalmentCount = 1;
   if (input.plan !== "full") {
+    if (camp.kind === "club" || camp.kind === "darts") return { ok: false, error: "Clubs and darts are paid in full." };
     if (!instalmentOptions(today, firstDay, rules).includes(input.plan)) {
       return { ok: false, error: "Instalments aren't available for these dates. Please choose to pay in full." };
     }

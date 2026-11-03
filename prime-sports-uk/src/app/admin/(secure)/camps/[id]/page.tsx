@@ -6,7 +6,8 @@ import { requireOwner } from "@/lib/auth";
 import { toLondonInput } from "@/lib/admin";
 import { publicImageUrl } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
-import type { Camp } from "@/lib/types";
+import { kindWords } from "@/lib/camp-kind";
+import type { Camp, CampKind } from "@/lib/types";
 import { CampForm, DaysEditor, DeleteCampButton } from "./CampEditor";
 
 export default async function CampEditPage({ params, searchParams }: PageProps<"/admin/camps/[id]">) {
@@ -24,16 +25,19 @@ export default async function CampEditPage({ params, searchParams }: PageProps<"
     const { data: avail } = await supabase.rpc("camp_availability", { p_camp: id });
     days = ((avail ?? []) as { day_id: string; date: string; capacity: number; taken: number }[]).map((d) => ({ id: d.day_id, date: d.date, capacity: d.capacity, taken: d.taken }));
   }
+  const newKind: CampKind = sp.kind === "club" || sp.kind === "darts" ? sp.kind : "camp";
+  const kind = camp?.kind ?? newKind;
+  const w = kindWords(kind);
   return (
     <>
-      <p><Link href="/admin/camps">← All camps</Link></p>
-      <h1 className="admin-title">{camp ? camp.school : "Add a camp"}</h1>
-      {sp.created && <p className="okmsg">Camp created. Now add its days, photo and school logo.</p>}
+      <p><Link href={`/admin/camps?type=${kind}`}>← All {kind === "camp" ? "camps" : kind === "club" ? "school clubs" : "darts sessions"}</Link></p>
+      <h1 className="admin-title">{camp ? camp.school : `Add ${kind === "camp" ? "a holiday camp" : kind === "club" ? "a school club" : "darts sessions"}`}</h1>
+      {sp.created && <p className="okmsg">Created. Now add its {w.units}, photo and school logo.</p>}
       <div className="camp-detail">
-        <CampForm camp={camp ? { ...camp, booking_opens_at: toLondonInput(camp.booking_opens_at), booking_closes_at: toLondonInput(camp.booking_closes_at) } : null} />
+        <CampForm camp={camp ? { ...camp, booking_opens_at: toLondonInput(camp.booking_opens_at), booking_closes_at: toLondonInput(camp.booking_closes_at) } : null} defaultKind={newKind} />
         {camp && (
           <div style={{ display: "grid", gap: "1rem", alignContent: "start" }}>
-            <DaysEditor campId={camp.id} days={days} />
+            <DaysEditor campId={camp.id} days={days} kind={kind} />
             <ImageUpload action={uploadCampLogo.bind(null, camp.id)} label="School logo (black circle)" previewUrl={publicImageUrl(camp.logo_path)} previewShape="circle" />
             {camp.logo_path && <form action={clearCampImage.bind(null, camp.id, "logo")}><button className="link">Remove logo (show initials)</button></form>}
             <p className="hint">We remove a plain white or flat background automatically, trim the edges and centre the logo. Your original file is kept.</p>

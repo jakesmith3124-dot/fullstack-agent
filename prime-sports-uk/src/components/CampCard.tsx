@@ -1,11 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { dateRange, gbp, initials, shortDay, timeRange } from "@/lib/format";
+import { dateRange, fmtDate, gbp, initials, shortDay, timeRange } from "@/lib/format";
 import { spaceLevel, spacesLeft } from "@/lib/pricing";
+import { kindWords } from "@/lib/camp-kind";
 import { publicImageUrl } from "@/lib/storage";
+import type { CampKind } from "@/lib/types";
 
 export type CampCardData = {
   slug: string;
+  kind?: CampKind;
   school: string;
   area: string;
   age_min: number;
@@ -33,6 +36,7 @@ export function SchoolLogo({ school, logoPath, size = 84 }: { school: string; lo
 export function CampCard({ camp, index = 0 }: { camp: CampCardData; index?: number }) {
   const photo = publicImageUrl(camp.photo_path);
   const flagged = camp.days.filter((d) => spaceLevel(d) !== "ok");
+  const w = kindWords(camp.kind);
   const allFull = camp.days.length > 0 && camp.days.every((d) => spaceLevel(d) === "full");
   return (
     <article className="camp">
@@ -45,11 +49,11 @@ export function CampCard({ camp, index = 0 }: { camp: CampCardData; index?: numb
         <SchoolLogo school={camp.school} logoPath={camp.logo_path} />
       </div>
       <div className="camp-body">
-        <span className="area-tag">{camp.area}{camp.is_demo ? " · Example" : ""}</span>
+        <span className="area-tag">{w.weekly ? `${w.label} · ` : ""}{camp.area}{camp.is_demo ? " · Example" : ""}</span>
         <h3>{camp.school}</h3>
         <span className="age">{camp.age_min} to {camp.age_max} Years</span>
-        <p><b>{dateRange(camp.days.map((d) => d.date))}</b></p>
-        <p>{timeRange(camp.start_time, camp.end_time)} · from {gbp(camp.price_per_day_pence)} per day</p>
+        <p><b>{w.weekly && camp.days.length ? `${fmtDate(camp.days[0].date, { weekday: "long" })}s · ${camp.days.length} sessions · ` : ""}{dateRange(camp.days.map((d) => d.date))}</b></p>
+        <p>{timeRange(camp.start_time, camp.end_time)} · from {gbp(camp.price_per_day_pence)} per {w.unit}</p>
         {flagged.length > 0 && (
           <div className="day-flags" aria-label="Days filling up">
             {flagged.map((d) => {

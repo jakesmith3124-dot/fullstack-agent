@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { assertOwner, audit } from "@/lib/auth";
 import { bool, londonDateTime, num, pounds, refreshPublic, str, type ActionResult } from "@/lib/admin";
 import { slugify } from "@/lib/format";
+import type { CampKind } from "@/lib/types";
 import { processLogo, processPhoto } from "@/lib/images";
 import { addDays } from "@/lib/pricing";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
@@ -23,10 +24,11 @@ export async function saveCamp(campId: string | null, _prev: ActionResult, fd: F
   if (school.length < 2) return { ok: false, error: "Add the school or venue name." };
   if (area.length < 2) return { ok: false, error: "Add the area or town." };
   if (ageMin === null || ageMax === null || ageMin > ageMax) return { ok: false, error: "Check the age range." };
-  if (price === null || price < 0) return { ok: false, error: "Add a price per day." };
+  if (price === null || price < 0) return { ok: false, error: "Add a price." };
   const row = {
     school, area,
     brand: str(fd, "brand") === "prime_camps" ? "prime_camps" : "holiday",
+    kind: (["club", "darts"].includes(str(fd, "kind")) ? str(fd, "kind") : "camp") as CampKind,
     address: str(fd, "address") || null,
     postcode: str(fd, "postcode").toUpperCase() || null,
     description: str(fd, "description") || null,
@@ -108,19 +110,20 @@ export async function addCampDays(campId: string, _prev: ActionResult, fd: FormD
   const to = str(fd, "to") || from;
   const capacity = num(fd, "capacity");
   const weekdaysOnly = bool(fd, "weekdays_only");
+  const weekly = str(fd, "repeat") === "weekly";
   if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || to < from) return { ok: false, error: "Choose the first and last dates." };
-  if (capacity === null || capacity < 0) return { ok: false, error: "Set the number of places per day." };
+  if (capacity === null || capacity < 0) return { ok: false, error: "Set the number of places." };
   const rows: { camp_id: string; date: string; capacity: number }[] = [];
-  for (let d = from; d <= to && rows.length < 60; d = addDays(d, 1)) {
+  for (let d = from; d <= to && rows.length < 60; d = addDays(d, weekly ? 7 : 1)) {
     const dow = new Date(`${d}T12:00:00Z`).getUTCDay();
-    if (weekdaysOnly && (dow === 0 || dow === 6)) continue;
+    if (!weekly && weekdaysOnly && (dow === 0 || dow === 6)) continue;
     rows.push({ camp_id: campId, date: d, capacity });
   }
   const supabase = await createClient();
   const { error } = await supabase.from("camp_days").upsert(rows, { onConflict: "camp_id,date", ignoreDuplicates: true });
   if (error) return { ok: false, error: error.message };
   refreshPublic();
-  return { ok: true, message: `Added ${rows.length} day${rows.length === 1 ? "" : "s"}.` };
+  return { ok: true, message: `Added ${rows.length} ${weekly ? "session" : "day"}${rows.length === 1 ? "" : "s"}.` };
 }
 
 export async function updateDayCapacity(dayId: string, capacity: number): Promise<ActionResult> {

@@ -7,6 +7,7 @@ import { DARTS_URL } from "@/lib/env";
 
 const NAV = [
   { href: "/camps", label: "Holiday Camps" },
+  { href: "/clubs", label: "Clubs & Darts" },
   { href: "/prime-camps", label: "Prime Camps" },
   { href: "/goat", label: "G.O.A.T" },
   { href: "/schools", label: "Schools" },

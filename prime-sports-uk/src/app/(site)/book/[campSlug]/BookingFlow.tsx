@@ -11,11 +11,14 @@ import { SchoolLogo } from "@/components/CampCard";
 import { WaitingListForm } from "@/components/WaitingListForm";
 import { ageOn, fmtDate, gbp, longDate, shortDay, timeRange } from "@/lib/format";
 import { instalmentOptions, instalmentSchedule, quote, spaceLevel, spacesLeft, type DiscountCode, type InstalmentRules } from "@/lib/pricing";
+import { kindWords } from "@/lib/camp-kind";
+import type { CampKind } from "@/lib/types";
 import { childSchema, parentSchema, type ChildInput, type ParentInput } from "@/lib/validation";
 
 type CampInfo = {
   slug: string; school: string; area: string; age_min: number; age_max: number; start_time: string; end_time: string;
   price_per_day_pence: number; full_week_price_pence: number | null; logo_path: string | null; photo_path: string | null; total_days: number;
+  kind: CampKind;
 };
 type Day = { day_id: string; date: string; capacity: number; taken: number };
 export type SavedChild = { id: string; first_name: string; last_name: string; dob: string; school: string | null; medical: string | null; allergies: string | null; send: string | null; photo_consent: boolean; collectors: string[] };
@@ -58,7 +61,9 @@ export function BookingFlow(props: {
     pricePerDayPence: camp.price_per_day_pence, fullWeekPricePence: camp.full_week_price_pence, campDayCount: camp.total_days,
     selectedDayCount: picked.length, childCount: Math.max(1, kids.length), siblingPct, code,
   });
-  const options = firstDay ? instalmentOptions(today, firstDay, rules) : [];
+  const w = kindWords(camp.kind);
+  // Clubs and darts are paid in full (weekly or for the whole term).
+  const options = firstDay && !w.weekly ? instalmentOptions(today, firstDay, rules) : [];
   const effectivePlan: "full" | number = plan !== "full" && options.includes(plan) ? plan : "full";
   const schedule = instalmentSchedule(q.totalPence, effectivePlan === "full" ? 1 : effectivePlan, today);
   const dueNow = schedule[0]?.amountPence ?? 0;
@@ -144,16 +149,16 @@ export function BookingFlow(props: {
       </div>
       {picked.length ? (
         <div className="chips">{chosenDates.map((d) => <span key={d} className="tag gold">{shortDay(d)}</span>)}</div>
-      ) : <p className="hint">No days picked yet.</p>}
+      ) : <p className="hint">No {w.units} picked yet.</p>}
       {picked.length > 0 && kids.map((k, i) => (
-        <div className="line" key={i}><span>{(k.first_name || `Child ${i + 1}`)} · {picked.length} day{picked.length > 1 ? "s" : ""}</span><span>{gbp(q.perChildPence)}</span></div>
+        <div className="line" key={i}><span>{(k.first_name || `Child ${i + 1}`)} · {picked.length} {picked.length > 1 ? w.units : w.unit}</span><span>{gbp(q.perChildPence)}</span></div>
       ))}
-      {q.usesFullWeekPrice && <p className="hint">Full-week price applied.</p>}
+      {q.usesFullWeekPrice && <p className="hint">{w.weekly ? "Whole-term" : "Full-week"} price applied.</p>}
       {q.siblingDiscountPence > 0 && <div className="line disc"><span>Sibling discount</span><span>−{gbp(q.siblingDiscountPence)}</span></div>}
       {q.codeDiscountPence > 0 && <div className="line disc"><span>{code?.label || code?.code}</span><span>−{gbp(q.codeDiscountPence)}</span></div>}
       <div className="line total"><span>Total</span><span>{gbp(picked.length ? q.totalPence : 0)}</span></div>
       {step >= 3 && effectivePlan !== "full" && <div className="today"><span>Due today</span><span>{gbp(dueNow)}</span></div>}
-      <div className="trust"><span>✓ Secure card payments</span><span>✓ Pay in instalments on camps booked early</span>{siblingPct > 0 && <span>✓ Sibling discount applied automatically</span>}</div>
+      <div className="trust"><span>✓ Secure card payments</span>{!w.weekly && <span>✓ Pay in instalments on camps booked early</span>}{siblingPct > 0 && <span>✓ Sibling discount applied automatically</span>}</div>
     </aside>
   );
 
@@ -172,23 +177,26 @@ export function BookingFlow(props: {
 
           {step === 0 && (
             <>
-              <h1>Book a holiday camp</h1>
+              <h1>Book {camp.kind === "club" ? "a school club" : camp.kind === "darts" ? "darts sessions" : "a holiday camp"}</h1>
               <div className="card">
                 <div className="camp-pick">
                   <SchoolLogo school={camp.school} logoPath={camp.logo_path} size={64} />
                   <div style={{ flex: 1 }}>
                     <h2 style={{ fontSize: "1.6rem" }}>{camp.school}</h2>
-                    <p className="muted">{camp.area} · Ages {camp.age_min}–{camp.age_max} · {timeRange(camp.start_time, camp.end_time)} · {gbp(camp.price_per_day_pence)} a day</p>
+                    <p className="muted">{camp.area} · Ages {camp.age_min}–{camp.age_max} · {timeRange(camp.start_time, camp.end_time)} · {gbp(camp.price_per_day_pence)} a {w.unit}{camp.full_week_price_pence ? ` · ${gbp(camp.full_week_price_pence)} for the ${w.whole}` : ""}</p>
                   </div>
                 </div>
-                <Link className="link" href="/camps">Choose a different camp</Link>
+                <Link className="link" href={w.weekly ? "/clubs" : "/camps"}>Choose a different {w.weekly ? "club" : "camp"}</Link>
               </div>
               <div className="card">
                 <div className="row">
-                  <div><h2>Pick your days</h2><p className="muted">Tap the days you&apos;d like.</p></div>
-                  <button type="button" className="link" onClick={() => { setPicked(days.filter((d) => spacesLeft(d) > 0).map((d) => d.day_id)); invalidate(); }}>Select all days</button>
+                  <div>
+                    <h2>Pick your {w.units}</h2>
+                    <p className="muted">{w.weekly ? `Tap the weeks you'd like, or book the whole term${camp.full_week_price_pence ? ` for ${gbp(camp.full_week_price_pence)}` : ""}.` : "Tap the days you'd like."}</p>
+                  </div>
+                  <button type="button" className={w.weekly ? "btn small" : "link"} onClick={() => { setPicked(days.filter((d) => spacesLeft(d) > 0).map((d) => d.day_id)); invalidate(); }}>{w.weekly ? "Book the whole term" : "Select all days"}</button>
                 </div>
-                <div className="days" role="group" aria-label="Camp days">
+                <div className="days" role="group" aria-label={w.weekly ? "Sessions" : "Camp days"}>
                   {days.map((d) => {
                     const left = spacesLeft(d);
                     const on = picked.includes(d.day_id);
@@ -202,7 +210,7 @@ export function BookingFlow(props: {
                         aria-label={`${longDate(d.date)}, ${left <= 0 ? "full" : `${left} spaces left`}`}
                         onClick={() => { setPicked((p) => (on ? p.filter((x) => x !== d.day_id) : [...p, d.day_id])); invalidate(); }}
                       >
-                        <span className="dw">{fmtDate(d.date, { weekday: "short" })}</span>
+                        <span className="dw">{fmtDate(d.date, w.weekly ? { month: "short" } : { weekday: "short" })}</span>
                         <span className="dn">{fmtDate(d.date, { day: "numeric" })}</span>
                         <span className="dm">{fmtDate(d.date, { month: "short" })}</span>
                         <span className={`sp ${spaceLevel(d)}`}>{left <= 0 ? "Full" : `${left} left`}</span>
@@ -213,7 +221,7 @@ export function BookingFlow(props: {
                 {fullDays.length > 0 && (
                   <div style={{ display: "grid", gap: ".8rem" }}>
                     <button type="button" className="link" style={{ justifySelf: "start" }} onClick={() => setShowWaiting((s) => !s)} aria-expanded={showWaiting}>
-                      {fullDays.length === 1 ? "That day is full." : "Some days are full."} Join the waiting list
+                      {fullDays.length === 1 ? `That ${w.unit} is full.` : `Some ${w.units} are full.`} Join the waiting list
                     </button>
                     {showWaiting && <WaitingListForm days={fullDays.map((d) => ({ id: d.day_id, label: longDate(d.date) }))} />}
                   </div>
@@ -300,7 +308,7 @@ export function BookingFlow(props: {
                 <button type="button" role="radio" className="plan" aria-checked={effectivePlan === "full"} onClick={() => { invalidate(); setPlan("full"); }}>
                   <span className="radio" /><span><b>Pay in full</b><span className="hint">One payment today</span></span><b>{gbp(q.totalPence)}</b>
                 </button>
-                {Array.from({ length: Math.max(1, rules.max_count - 1) }, (_, i) => i + 2).map((n) => {
+                {!w.weekly && Array.from({ length: Math.max(1, rules.max_count - 1) }, (_, i) => i + 2).map((n) => {
                   const ok = options.includes(n);
                   const s = instalmentSchedule(q.totalPence, n, today);
                   return (

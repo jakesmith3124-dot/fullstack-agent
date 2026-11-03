@@ -2,18 +2,38 @@ import Link from "next/link";
 import { moveCamp, setCampFlag } from "@/app/actions/admin-camps";
 import { requireOwner } from "@/lib/auth";
 import { dateRange, gbp, todayLondon } from "@/lib/format";
+import { kindWords } from "@/lib/camp-kind";
 import { createClient } from "@/lib/supabase/server";
+import type { CampKind } from "@/lib/types";
 
-export default async function CampsAdmin() {
+const TABS: { kind: CampKind; label: string; add: string }[] = [
+  { kind: "camp", label: "Holiday camps", add: "+ Add a holiday camp" },
+  { kind: "club", label: "School clubs", add: "+ Add a school club" },
+  { kind: "darts", label: "Darts", add: "+ Add darts sessions" },
+];
+
+export default async function CampsAdmin({ searchParams }: PageProps<"/admin/camps">) {
   await requireOwner("/admin/camps");
+  const sp = await searchParams;
+  const tab = TABS.find((t) => t.kind === sp.type) ?? TABS[0];
+  const w = kindWords(tab.kind);
   const supabase = await createClient();
-  const { data } = await supabase.from("camps").select("id, slug, school, area, price_per_day_pence, is_visible, confirmed, is_demo, brand, camp_days(date)").order("sort_order").order("school");
+  const { data } = await supabase.from("camps").select("id, slug, school, area, price_per_day_pence, is_visible, confirmed, is_demo, brand, kind, camp_days(date)").order("sort_order").order("school");
   const today = todayLondon();
-  const camps = (data ?? []) as unknown as { id: string; slug: string; school: string; area: string; price_per_day_pence: number; is_visible: boolean; confirmed: boolean; is_demo: boolean; brand: string; camp_days: { date: string }[] }[];
+  const all = (data ?? []) as unknown as { id: string; slug: string; school: string; area: string; price_per_day_pence: number; is_visible: boolean; confirmed: boolean; is_demo: boolean; brand: string; kind: CampKind | null; camp_days: { date: string }[] }[];
+  const camps = all.filter((c) => (c.kind ?? "camp") === tab.kind);
   return (
     <>
-      <div className="row"><h1 className="admin-title">Camps</h1><Link className="btn" href="/admin/camps/new">+ Add a camp</Link></div>
-      <p className="muted">Lower in the list shows later on the site. Camps only appear publicly when they are both <b>visible</b> and <b>confirmed</b>, and have days from today onwards.</p>
+      <div className="row"><h1 className="admin-title">Camps, clubs and darts</h1><Link className="btn" href={`/admin/camps/new?kind=${tab.kind}`}>{tab.add}</Link></div>
+      <div className="chips" style={{ marginBottom: "1rem" }}>
+        {TABS.map((t) => (
+          <Link key={t.kind} className="chip" aria-pressed={t.kind === tab.kind} href={`/admin/camps?type=${t.kind}`}>
+            {t.label} ({all.filter((c) => (c.kind ?? "camp") === t.kind).length})
+          </Link>
+        ))}
+      </div>
+      <p className="muted">Lower in the list shows later on the site. They only appear publicly when they are both <b>visible</b> and <b>confirmed</b>, and have {w.units} from today onwards.{w.weekly ? " Parents can book single weeks or the whole term." : ""}</p>
+      {camps.length === 0 && <p className="muted">Nothing here yet.</p>}
       <div style={{ display: "grid", gap: ".8rem" }}>
         {camps.map((c, i) => {
           const dates = c.camp_days.map((d) => d.date);
@@ -23,7 +43,7 @@ export default async function CampsAdmin() {
               <div className="row">
                 <div>
                   <h2 style={{ fontSize: "1.3rem" }}><Link href={`/admin/camps/${c.id}`}>{c.school}</Link></h2>
-                  <p className="muted">{c.area} · {dates.length ? dateRange(dates) : "No days yet"} · {gbp(c.price_per_day_pence)}/day{c.brand === "prime_camps" ? " · Prime Camps" : ""}</p>
+                  <p className="muted">{c.area} · {dates.length ? dateRange(dates) : "No days yet"} · {gbp(c.price_per_day_pence)}/{w.unit}{c.brand === "prime_camps" ? " · Prime Camps" : ""}</p>
                 </div>
                 <div className="chips">
                   {c.is_demo && <span className="tag ph">Example</span>}

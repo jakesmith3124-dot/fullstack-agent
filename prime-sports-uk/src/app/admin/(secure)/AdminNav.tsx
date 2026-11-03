@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const OWNER = [
-  ["/admin", "Dashboard"], ["/admin/camps", "Camps"], ["/admin/bookings", "Bookings"], ["/admin/register", "Registers"],
+  ["/admin", "Dashboard"], ["/admin/camps", "Camps & clubs"], ["/admin/bookings", "Bookings"], ["/admin/register", "Registers"],
   ["/admin/reports", "Reports"], ["/admin/waiting-lists", "Waiting lists"], ["/admin/content", "Content"],
   ["/admin/discounts", "Discounts"], ["/admin/settings", "Settings"], ["/admin/leads", "Sign-ups"],
   ["/admin/memberships", "Memberships"], ["/admin/staff", "Staff"], ["/admin/audit", "Audit log"],

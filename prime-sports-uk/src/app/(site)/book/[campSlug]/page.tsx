@@ -50,7 +50,7 @@ export default async function BookPage({ params }: PageProps<"/book/[campSlug]">
         slug: camp.slug, school: camp.school, area: camp.area, age_min: camp.age_min, age_max: camp.age_max,
         start_time: camp.start_time, end_time: camp.end_time, price_per_day_pence: camp.price_per_day_pence,
         full_week_price_pence: camp.full_week_price_pence, logo_path: camp.logo_path, photo_path: camp.photo_path,
-        total_days: camp.days.length,
+        total_days: camp.days.length, kind: camp.kind ?? "camp",
       }}
       days={days}
       siblingPct={sibling.confirmed ? sibling.pct : 0}

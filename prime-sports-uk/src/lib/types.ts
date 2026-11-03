@@ -1,9 +1,12 @@
 export type Role = "owner" | "staff" | "parent";
+export type CampKind = "camp" | "club" | "darts";
 
 export type Camp = {
   id: string;
   slug: string;
   brand: "holiday" | "prime_camps";
+  /** camp: holiday camp (days). club: school club, darts: darts sessions (weekly sessions, termly price). */
+  kind: CampKind;
   school: string;
   area: string;
   address: string | null;

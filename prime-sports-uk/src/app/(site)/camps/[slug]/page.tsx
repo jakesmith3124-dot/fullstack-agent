@@ -9,6 +9,7 @@ import { getCampBySlug, getCampSlugs, getFlags, isBookable } from "@/lib/data";
 import { SITE_URL } from "@/lib/env";
 import { dateRange, gbp, longDate, shortDay, timeRange, todayLondon } from "@/lib/format";
 import { spaceLevel, spacesLeft } from "@/lib/pricing";
+import { kindWords } from "@/lib/camp-kind";
 import { publicImageUrl } from "@/lib/storage";
 
 export const revalidate = 60;
@@ -21,9 +22,10 @@ export async function generateMetadata({ params }: PageProps<"/camps/[slug]">): 
   const camp = await getCampBySlug((await params).slug);
   if (!camp) return { title: "Camp not found" };
   const dates = dateRange(camp.days.map((d) => d.date));
+  const w = kindWords(camp.kind);
   return {
-    title: `${camp.school} holiday camp, ${camp.area}`,
-    description: `Holiday camp at ${camp.school}, ${camp.area}. Ages ${camp.age_min} to ${camp.age_max}. ${dates}. From ${gbp(camp.price_per_day_pence)} per day.`,
+    title: `${camp.school} ${w.noun}, ${camp.area}`,
+    description: `${w.label} at ${camp.school}, ${camp.area}. Ages ${camp.age_min} to ${camp.age_max}. ${dates}. From ${gbp(camp.price_per_day_pence)} per ${w.unit}.`,
     alternates: { canonical: `/camps/${camp.slug}` },
     openGraph: camp.photo_path ? { images: [publicImageUrl(camp.photo_path)!] } : undefined,
   };
@@ -39,12 +41,13 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
   const bookable = !past && isBookable(camp, flags);
   const fullDays = upcoming.filter((d) => spaceLevel(d) === "full");
   const photo = publicImageUrl(camp.photo_path);
+  const w = kindWords(camp.kind);
   const mapQuery = encodeURIComponent([camp.school, camp.address, camp.postcode].filter(Boolean).join(", "));
 
   const events = upcoming.map((d) => ({
     "@context": "https://schema.org",
     "@type": "Event",
-    name: `${camp.school} holiday camp`,
+    name: `${camp.school} ${w.noun}`,
     startDate: `${d.date}T${camp.start_time.slice(0, 5)}`,
     endDate: `${d.date}T${camp.end_time.slice(0, 5)}`,
     eventStatus: "https://schema.org/EventScheduled",
@@ -61,9 +64,9 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
       {events.length > 0 && <JsonLd data={events} />}
       <div className="page-head">
         <div className="wrap">
-          <div className="eyebrow">{camp.area}{camp.is_demo ? " · Example camp" : ""}</div>
+          <div className="eyebrow">{w.weekly ? `${w.label} · ` : ""}{camp.area}{camp.is_demo ? " · Example camp" : ""}</div>
           <h1>{camp.school}</h1>
-          <p>{camp.description || `Multi-sports holiday camp for ages ${camp.age_min} to ${camp.age_max}.`}</p>
+          <p>{camp.description || (w.weekly ? `Weekly ${camp.kind === "darts" ? "darts" : "club"} sessions for ages ${camp.age_min} to ${camp.age_max}. Book single weeks or the whole term.` : `Multi-sports holiday camp for ages ${camp.age_min} to ${camp.age_max}.`)}</p>
         </div>
       </div>
       <section style={{ paddingTop: "2rem" }}>
@@ -78,16 +81,16 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
               <p><b>{dateRange(camp.days.map((d) => d.date))}</b></p>
               <p>{timeRange(camp.start_time, camp.end_time)}</p>
               <p>
-                From <b>{gbp(camp.price_per_day_pence)}</b> per day
-                {camp.full_week_price_pence ? <> · <b>{gbp(camp.full_week_price_pence)}</b> for the full week</> : null}
+                From <b>{gbp(camp.price_per_day_pence)}</b> per {w.unit}
+                {camp.full_week_price_pence ? <> · <b>{gbp(camp.full_week_price_pence)}</b> for the {w.whole}</> : null}
               </p>
             </div>
           </div>
           <div style={{ display: "grid", gap: "1.2rem", alignContent: "start" }}>
             <div className="card">
-              <h2 className="h3-size">Days and spaces</h2>
+              <h2 className="h3-size">{w.weekly ? "Sessions and spaces" : "Days and spaces"}</h2>
               {past ? (
-                <p className="muted">This camp has finished. <Link href="/camps">See upcoming camps</Link>.</p>
+                <p className="muted">This {w.weekly ? "term" : "camp"} has finished. <Link href={w.weekly ? "/clubs" : "/camps"}>See what&apos;s coming up</Link>.</p>
               ) : (
                 <ul className="day-list">
                   {upcoming.map((d) => {
@@ -104,12 +107,12 @@ export default async function CampPage({ params }: PageProps<"/camps/[slug]">) {
               {bookable && fullDays.length < upcoming.length && (
                 <Link className="btn" href={`/book/${camp.slug}`}>Book now →</Link>
               )}
-              {!past && !bookable && <p className="muted">Bookings for this camp aren&apos;t open yet.</p>}
+              {!past && !bookable && <p className="muted">Bookings aren&apos;t open yet.</p>}
             </div>
             {fullDays.length > 0 && (
               <div className="card">
                 <h2 className="h3-size">Join the waiting list</h2>
-                <p className="muted">We&apos;ll email you if a space opens up on a full day.</p>
+                <p className="muted">We&apos;ll email you if a space opens up on a full {w.unit}.</p>
                 <WaitingListForm days={fullDays.map((d) => ({ id: d.day_id, label: longDate(d.date) }))} />
               </div>
             )}

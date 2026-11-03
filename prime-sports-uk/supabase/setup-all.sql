@@ -1148,3 +1148,8 @@ The welfare of every child in our care comes first.
 
 [OWNER TO SUPPLY THE FULL POLICY]$$), false, 'Owner to supply the policy and DSL name', 5)
 on conflict (key) do nothing;
+-- School clubs and darts sessions use the same camps, days and bookings as holiday camps.
+-- A club's days are its weekly sessions; parents book single weeks or the whole term
+-- (full_week_price_pence is the full-term price for clubs and darts).
+alter table public.camps add column if not exists kind text not null default 'camp'
+  check (kind in ('camp', 'club', 'darts'));

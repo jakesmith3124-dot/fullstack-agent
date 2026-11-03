@@ -11,12 +11,12 @@ export const revalidate = 300;
 const KNOWN_AREAS = ["Halifax", "Bradford", "Calderdale", "Kirklees"];
 
 async function resolveArea(slug: string): Promise<string | null> {
-  const fromCamps = (await getCampSlugs()).map((c) => c.area);
+  const fromCamps = (await getCampSlugs()).filter((c) => c.kind === "camp").map((c) => c.area);
   return [...new Set([...fromCamps, ...KNOWN_AREAS])].find((a) => slugify(a) === slug) ?? null;
 }
 
 export async function generateStaticParams() {
-  const areas = new Set([...(await getCampSlugs()).map((c) => c.area), ...KNOWN_AREAS]);
+  const areas = new Set([...(await getCampSlugs()).filter((c) => c.kind === "camp").map((c) => c.area), ...KNOWN_AREAS]);
   return [...areas].map((a) => ({ area: slugify(a) }));
 }
 

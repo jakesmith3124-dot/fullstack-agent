@@ -3,7 +3,7 @@ import { unstable_cache } from "next/cache";
 import { createPublicClient } from "./supabase/server";
 import { todayLondon } from "./format";
 import { DEFAULT_INSTALMENT_RULES, type InstalmentRules } from "./pricing";
-import type { AgeGroup, Camp, CampDay, CampWithDays, ContentItem, Flags } from "./types";
+import type { AgeGroup, Camp, CampDay, CampKind, CampWithDays, ContentItem, Flags } from "./types";
 
 // Public reads are cached and tagged; admin saves call revalidateTag("public") to refresh them.
 const PUBLIC_TAG = "public";
@@ -87,7 +87,7 @@ export async function getContent() {
 }
 
 const CAMP_COLUMNS =
-  "id, slug, brand, school, area, address, postcode, description, age_min, age_max, start_time, end_time, price_per_day_pence, full_week_price_pence, booking_opens_at, booking_closes_at, photo_path, photo_alt, logo_path, logo_original_path, what_to_bring, timetable, sort_order, is_visible, confirmed, is_demo";
+  "id, slug, brand, kind, school, area, address, postcode, description, age_min, age_max, start_time, end_time, price_per_day_pence, full_week_price_pence, booking_opens_at, booking_closes_at, photo_path, photo_alt, logo_path, logo_original_path, what_to_bring, timetable, sort_order, is_visible, confirmed, is_demo";
 
 const cachedCamps = unstable_cache(
   async (): Promise<Camp[]> => {
@@ -110,10 +110,10 @@ export async function getCampDays(campId: string): Promise<CampDay[]> {
   return (data ?? []) as CampDay[];
 }
 
-/** Camps with at least one day from today onwards, with live availability. */
-export async function getUpcomingCamps(): Promise<CampWithDays[]> {
+/** Camps (or clubs and darts sessions) with at least one day from today onwards, with live availability. */
+export async function getUpcomingCamps(kinds: CampKind[] = ["camp"]): Promise<CampWithDays[]> {
   const today = todayLondon();
-  const camps = await loadCamps();
+  const camps = (await loadCamps()).filter((c) => kinds.includes(c.kind ?? "camp"));
   const withDays = await Promise.all(camps.map(async (c) => ({ ...c, days: await getCampDays(c.id) })));
   return withDays
     .map((c) => ({ ...c, days: c.days.filter((d) => d.date >= today) }))
@@ -126,8 +126,8 @@ export async function getCampBySlug(slug: string): Promise<CampWithDays | null> 
   return { ...camp, days: await getCampDays(camp.id) };
 }
 
-export async function getCampSlugs(): Promise<{ slug: string; area: string }[]> {
-  return (await loadCamps()).map((c) => ({ slug: c.slug, area: c.area }));
+export async function getCampSlugs(): Promise<{ slug: string; area: string; kind: CampKind }[]> {
+  return (await loadCamps()).map((c) => ({ slug: c.slug, area: c.area, kind: c.kind ?? "camp" }));
 }
 
 export function isBookable(camp: Camp, flags: Flags, now = new Date()): boolean {

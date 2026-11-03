@@ -5,6 +5,7 @@ import type { CampWithDays, Flags } from "./types";
 export function toCardData(c: CampWithDays, flags: Flags): CampCardData & { address: string | null; postcode: string | null } {
   return {
     slug: c.slug,
+    kind: c.kind ?? "camp",
     school: c.school,
     area: c.area,
     address: c.address,

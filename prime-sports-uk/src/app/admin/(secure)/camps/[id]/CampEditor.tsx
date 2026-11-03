@@ -3,16 +3,26 @@ import { useFormAction } from "@/lib/use-form-action";
 import { useState, useTransition } from "react";
 import { addCampDays, deleteCamp, removeDay, saveCamp, updateDayCapacity } from "@/app/actions/admin-camps";
 import { longDate } from "@/lib/format";
-import type { Camp } from "@/lib/types";
+import { kindWords } from "@/lib/camp-kind";
+import type { Camp, CampKind } from "@/lib/types";
 
 type Result = { ok: boolean; error?: string; message?: string };
 
-export function CampForm({ camp }: { camp: Camp | null }) {
+export function CampForm({ camp, defaultKind = "camp" }: { camp: Camp | null; defaultKind?: CampKind }) {
   const [state, action, pending] = useFormAction<Result>(saveCamp.bind(null, camp?.id ?? null), { ok: false });
   const c = camp;
+  const [kind, setKind] = useState<CampKind>(c?.kind ?? defaultKind);
+  const w = kindWords(kind);
   return (
     <form onSubmit={action} className={`card${c && !c.confirmed ? " unconfirmed" : ""}`} style={{ alignSelf: "start" }}>
-      <h2>Camp details</h2>
+      <h2>Details</h2>
+      <label className="field">Type
+        <select name="kind" value={kind} onChange={(e) => setKind(e.target.value as CampKind)}>
+          <option value="camp">Holiday camp (book by the day)</option>
+          <option value="club">School club (book weekly or the whole term)</option>
+          <option value="darts">Darts sessions (book weekly or the whole term)</option>
+        </select>
+      </label>
       <label className="field">School or venue name<input name="school" defaultValue={c?.school} required /></label>
       <div className="grid2">
         <label className="field">Area / town<input name="area" defaultValue={c?.area} placeholder="Halifax" required /></label>
@@ -32,8 +42,8 @@ export function CampForm({ camp }: { camp: Camp | null }) {
         <label className="field">Oldest age<input name="age_max" type="number" min={2} max={18} defaultValue={c?.age_max ?? 11} /></label>
         <label className="field">Start time<input name="start_time" type="time" defaultValue={c?.start_time?.slice(0, 5) ?? "09:00"} /></label>
         <label className="field">Finish time<input name="end_time" type="time" defaultValue={c?.end_time?.slice(0, 5) ?? "15:00"} /></label>
-        <label className="field">Price per day (£)<input name="price_per_day" type="number" step="0.01" min={0} defaultValue={c ? (c.price_per_day_pence / 100).toFixed(2) : ""} required /></label>
-        <label className="field">Full-week price (£, optional)<input name="full_week_price" type="number" step="0.01" min={0} defaultValue={c?.full_week_price_pence ? (c.full_week_price_pence / 100).toFixed(2) : ""} /></label>
+        <label className="field">Price per {w.unit} (£)<input name="price_per_day" type="number" step="0.01" min={0} defaultValue={c ? (c.price_per_day_pence / 100).toFixed(2) : ""} required /></label>
+        <label className="field">{w.weekly ? "Whole-term price" : "Full-week price"} (£, optional)<input name="full_week_price" type="number" step="0.01" min={0} defaultValue={c?.full_week_price_pence ? (c.full_week_price_pence / 100).toFixed(2) : ""} /></label>
         <label className="field">Bookings open (optional)<input name="booking_opens_at" type="datetime-local" defaultValue={c?.booking_opens_at ?? ""} /></label>
         <label className="field">Bookings close (optional)<input name="booking_closes_at" type="datetime-local" defaultValue={c?.booking_closes_at ?? ""} /></label>
       </div>
@@ -51,17 +61,18 @@ export function CampForm({ camp }: { camp: Camp | null }) {
   );
 }
 
-export function DaysEditor({ campId, days }: { campId: string; days: { id: string; date: string; capacity: number; taken: number }[] }) {
+export function DaysEditor({ campId, days, kind = "camp" }: { campId: string; days: { id: string; date: string; capacity: number; taken: number }[]; kind?: CampKind }) {
+  const w = kindWords(kind);
   const [state, action, pending] = useFormAction<Result>(addCampDays.bind(null, campId), { ok: false });
   const [msg, setMsg] = useState<Result | null>(null);
   const [busy, start] = useTransition();
   return (
     <div className="card">
-      <h2>Days and places</h2>
+      <h2>{w.weekly ? "Sessions and places" : "Days and places"}</h2>
       {days.length ? (
         <div className="table-wrap">
           <table>
-            <thead><tr><th>Day</th><th>Booked</th><th>Places</th><th></th></tr></thead>
+            <thead><tr><th>{w.weekly ? "Session" : "Day"}</th><th>Booked</th><th>Places</th><th></th></tr></thead>
             <tbody>
               {days.map((d) => (
                 <tr key={d.id}>
@@ -77,20 +88,27 @@ export function DaysEditor({ campId, days }: { campId: string; days: { id: strin
             </tbody>
           </table>
         </div>
-      ) : <p className="muted">No days yet.</p>}
+      ) : <p className="muted">No {w.units} yet.</p>}
       {msg?.error && <p className="err">{msg.error}</p>}
       {msg?.message && <p className="okmsg">{msg.message}</p>}
       <form onSubmit={action} style={{ display: "grid", gap: ".6rem" }}>
-        <h3>Add days</h3>
+        <h3>Add {w.units}</h3>
         <div className="grid2">
-          <label className="field">From<input name="from" type="date" required /></label>
-          <label className="field">To (optional)<input name="to" type="date" /></label>
-          <label className="field">Places per day<input name="capacity" type="number" min={0} defaultValue={30} /></label>
+          <label className="field">{w.weekly ? "First session" : "From"}<input name="from" type="date" required /></label>
+          <label className="field">{w.weekly ? "Last session (end of term)" : "To (optional)"}<input name="to" type="date" /></label>
+          <label className="field">Places per {w.unit}<input name="capacity" type="number" min={0} defaultValue={w.weekly ? 20 : 30} /></label>
         </div>
-        <label className="chk"><input type="checkbox" name="weekdays_only" defaultChecked /><span>Weekdays only</span></label>
+        {w.weekly ? (
+          <>
+            <input type="hidden" name="repeat" value="weekly" />
+            <p className="hint">Adds one session every week on the same weekday as the first session. Remove any half-term weeks afterwards.</p>
+          </>
+        ) : (
+          <label className="chk"><input type="checkbox" name="weekdays_only" defaultChecked /><span>Weekdays only</span></label>
+        )}
         <p className="err" role="alert">{state.error}</p>
         {state.message && <p className="okmsg" role="status">{state.message}</p>}
-        <button className="btn small" type="submit" disabled={pending} style={{ justifySelf: "start" }}>{pending ? "Adding…" : "Add days"}</button>
+        <button className="btn small" type="submit" disabled={pending} style={{ justifySelf: "start" }}>{pending ? "Adding…" : `Add ${w.units}`}</button>
       </form>
     </div>
   );
